@@ -1,0 +1,127 @@
+import Loading from "@/components/Loading";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import WalletListItem from "@/components/WalletListItem";
+import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { useAuth } from "@/contexts/authContext";
+import useFetchData from "@/hooks/useFetchData";
+import { WalletType } from "@/types";
+import { verticalScale } from "@/utils/styling";
+import { useRouter } from "expo-router";
+import { orderBy, where } from "firebase/firestore";
+import * as Icons from "phosphor-react-native";
+import React, { useMemo } from "react";
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
+
+const Wallet = () => {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const constraints = useMemo(() => {
+    if (!user?.uid) return [];
+    return [where("uid", "==", user.uid), orderBy("created", "desc")];
+  }, [user?.uid]);
+
+  const {
+    data: wallets,
+    loading,
+    error,
+  } = useFetchData<WalletType>("wallets", constraints, [user?.uid]);
+
+  console.log("wallets:", wallets.length, { loading, error });
+
+  const getTotalBalance = () =>
+    wallets.reduce((total, item) => {
+      total = total + (item.amount || 0);
+      return total;
+    }, 0);
+
+  return (
+    <ScreenWrapper style={{ backgroundColor: colors.black }}>
+      <View style={styles.container}>
+        {/* Balance view */}
+        <View style={styles.balanceView}>
+          <View style={{ alignItems: "center" }}>
+            <Typo size={45} fontWeight={"500"}>
+              € {getTotalBalance()?.toFixed(2)},-
+            </Typo>
+            <Typo size={16} color={colors.neutral300}>
+              Totaal Bedrag
+            </Typo>
+          </View>
+        </View>
+
+        {/* All Wallets */}
+        <View style={styles.wallets}>
+          {/* header wallet */}
+          <View style={styles.flexRow}>
+            <Typo size={20} fontWeight={"500"}>
+              Mijn Wallets
+            </Typo>
+            <TouchableOpacity
+              onPress={() => router.push("/(modals)/walletModal")}
+            >
+              <Icons.PlusSquareIcon
+                weight="fill"
+                color={colors.primaryLight}
+                size={verticalScale(33)}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* nog te doen: Wallet list */}
+          {error ? (
+            <Typo color="red">Fout: {error}</Typo>
+          ) : loading ? (
+            <Loading />
+          ) : (
+            <FlatList
+              data={wallets}
+              keyExtractor={(item) => (item as any).id}
+              renderItem={({ item, index }) => (
+                <WalletListItem item={item} index={index} router={router} />
+              )}
+              contentContainerStyle={styles.listStyle}
+              ListEmptyComponent={
+                <Typo color={colors.neutral300}>Geen wallets gevonden.</Typo>
+              }
+            />
+          )}
+        </View>
+      </View>
+    </ScreenWrapper>
+  );
+};
+
+export default Wallet;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  balanceView: {
+    height: verticalScale(160),
+    backgroundColor: colors.black,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  flexRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacingY._10,
+  },
+  wallets: {
+    flex: 1,
+    backgroundColor: colors.neutral900,
+    borderTopRightRadius: radius._30,
+    borderTopLeftRadius: radius._30,
+    padding: spacingX._20,
+    paddingTop: spacingX._25,
+  },
+  listStyle: {
+    paddingVertical: spacingY._25,
+    paddingTop: spacingY._15,
+  },
+});
