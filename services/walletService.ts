@@ -1,6 +1,15 @@
 import { firestore } from "@/config/firebase";
 import { ResponseType, WalletType } from "@/types";
-import { collection, doc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 import { uploadFileToCloudinary } from "./imageService";
 
 export const createOrUpdateWallet = async (
@@ -38,6 +47,63 @@ export const createOrUpdateWallet = async (
     return { success: true, data: { ...walletToSave, id: walletRef.id } };
   } catch (error: any) {
     console.log("Error creating or updating wallet :", error);
+    return { success: false, msg: error.message };
+  }
+};
+
+export const deleteWallet = async (walletId: string): Promise<ResponseType> => {
+  try {
+    // 1) Verwijder eerst alle transacties van deze wallet (wachten tot klaar)
+    await deleteTransactionByWalletId(walletId);
+
+    // 2) Verwijder daarna de wallet zelf
+    const walletRef = doc(firestore, "wallets", walletId);
+    await deleteDoc(walletRef);
+
+    return { success: true, msg: "Wallet is successvol verwijderd" };
+  } catch (error: any) {
+    console.log("error deleting wallet:", error);
+    return { success: false, msg: error.message };
+  }
+};
+
+export const deleteTransactionByWalletId = async (
+  walletId: string
+): Promise<ResponseType> => {
+  try {
+    let hasMoreTransactions = true;
+
+    while (hasMoreTransactions) {
+      const transactionsQuery = query(
+        collection(firestore, "transactions"),
+        where("walletId", "==", walletId)
+      );
+
+      const transactionsSnapshot = await getDocs(transactionsQuery);
+      if (transactionsSnapshot.size === 0) {
+        hasMoreTransactions = false;
+        break;
+      }
+
+      const batch = writeBatch(firestore);
+
+      transactionsSnapshot.forEach((transactionDoc) => {
+        batch.delete(transactionDoc.ref);
+      });
+
+      await batch.commit();
+
+      console.log(
+        `${transactionsSnapshot.size} transactions deleted in this batch`
+      );
+    }
+
+    return {
+      success: true,
+      msg: "Alle transacties zijn succesvol verwijderd",
+    };
+  } catch (error: any) {
+    console.log("error deleting wallet:", error);
     return { success: false, msg: error.message };
   }
 };
