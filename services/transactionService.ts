@@ -1,12 +1,20 @@
-import { firestore } from "@/config/firebase";
+import { auth, firestore } from "@/config/firebase";
+import { colors } from "@/constants/theme";
 import { ResponseType, TransactionType, WalletType } from "@/types";
+import { getLast7Days } from "@/utils/common";
+import { scale } from "@/utils/styling";
 import {
   collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  orderBy,
+  query,
   setDoc,
+  Timestamp,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { uploadFileToCloudinary } from "./imageService";
 import { createOrUpdateWallet } from "./walletService";
@@ -27,9 +35,9 @@ export const createOrUpdateTransaction = async (
       );
       const oldTransaction = oldTransactionSnapshot.data() as TransactionType;
       const shouldRevertOriginal =
-        oldTransaction.type != type ||
-        oldTransaction.amount != amount ||
-        oldTransaction.walletId != walletId;
+        oldTransaction.type !== type ||
+        oldTransaction.amount !== amount ||
+        oldTransaction.walletId !== walletId;
 
       if (shouldRevertOriginal) {
         let res = await revertAndUpdateWallets(
@@ -63,6 +71,22 @@ export const createOrUpdateTransaction = async (
       }
       transactionData.image = imageUploadRes.data;
     }
+
+    // Ensure required fields for queries & rules
+    if (!transactionData.uid) {
+      const uid = auth.currentUser?.uid;
+      if (uid) (transactionData as any).uid = uid;
+    }
+    if (!transactionData.date) {
+      (transactionData as any).date = Timestamp.now();
+    }
+
+    // Remove undefined fields to satisfy Firestore (it doesn't accept undefined)
+    Object.keys(transactionData).forEach((k) => {
+      if ((transactionData as any)[k] === undefined) {
+        delete (transactionData as any)[k];
+      }
+    });
 
     const transactionRef = id
       ? doc(firestore, "transactions", id)
@@ -253,6 +277,73 @@ export const deleteTransaction = async (
     return { success: true };
   } catch (error: any) {
     console.log("error updating wallet for new transation:", error);
+    return { success: false, msg: error.message };
+  }
+};
+
+export const fetchWeeklyStats = async (uid: string): Promise<ResponseType> => {
+  try {
+    const db = firestore;
+    const today = new Date();
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+
+    const transactionsQuery = query(
+      collection(db, "transactions"),
+      where("date", ">=", Timestamp.fromDate(sevenDaysAgo)),
+      where("date", "<=", Timestamp.fromDate(today)),
+      orderBy("date", "desc"),
+      where("uid", "==", uid)
+    );
+
+    const querySnapshot = await getDocs(transactionsQuery);
+    const weeklyData = getLast7Days();
+    const transactions: TransactionType[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const transaction = doc.data() as TransactionType;
+      transaction.id = doc.id;
+      transactions.push(transaction);
+
+      const transactionDate = (transaction.date as Timestamp)
+        .toDate()
+        .toISOString()
+        .split("T")[0];
+
+      const dayData = weeklyData.find((day) => day.date === transactionDate);
+
+      if (dayData) {
+        if (transaction.type === "income") {
+          dayData.income += transaction.amount;
+        } else if (transaction.type === "expense") {
+          dayData.expense += transaction.amount;
+        }
+      }
+    });
+
+    const stats = weeklyData.flatMap((day) => [
+      {
+        value: day.income,
+        label: day.day,
+        spacing: scale(4),
+        labelWidth: scale(30),
+        frontColor: colors.primaryLight,
+      },
+      {
+        value: day.expense,
+        frontColor: colors.rose,
+      },
+    ]);
+
+    return {
+      success: true,
+      data: {
+        stats,
+        transactions,
+      },
+    };
+  } catch (error: any) {
+    console.log("error fetching weekly stats:", error);
     return { success: false, msg: error.message };
   }
 };
