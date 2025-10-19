@@ -1,7 +1,6 @@
 import { AuthProvider } from "@/contexts/authContext";
 import { Stack } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
 
 const StackLayout = () => {
   return (
@@ -25,6 +24,12 @@ const StackLayout = () => {
         }}
       />
       <Stack.Screen
+        name="(modals)/privacyPolicyModal"
+        options={{
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
         name="(modals)/searchModal"
         options={{
           presentation: "modal",
@@ -41,5 +46,3 @@ export default function RootLayout() {
     </AuthProvider>
   );
 }
-
-const styles = StyleSheet.create({});
