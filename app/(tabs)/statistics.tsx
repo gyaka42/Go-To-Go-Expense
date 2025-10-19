@@ -1,9 +1,14 @@
 import Header from "@/components/Header";
 import Loading from "@/components/Loading";
 import ScreenWrapper from "@/components/ScreenWrapper";
+import TransactionList from "@/components/TransactionList";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
-import { fetchWeeklyStats } from "@/services/transactionService";
+import {
+  fetchMonthlyStats,
+  fetchWeeklyStats,
+  fetchYearlyStats,
+} from "@/services/transactionService";
 import { scale, verticalScale } from "@/utils/styling";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import React, { useEffect, useState } from "react";
@@ -14,8 +19,8 @@ const Statistics = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { user } = useAuth();
   const [chartData, setChartData] = useState([]);
-
   const [chartLoading, setChartLoading] = useState(false);
+  const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
     if (activeIndex === 0) {
@@ -36,17 +41,36 @@ const Statistics = () => {
 
     if (res.success) {
       setChartData(res?.data?.stats);
+      setTransactions(res?.data?.transactions);
     } else {
       Alert.alert("Error", res.msg);
     }
   };
 
   const getMonthlyStats = async () => {
-    // maandelijkse stats ophalen
+    setChartLoading(true);
+    let res = await fetchMonthlyStats(user?.uid as string);
+    setChartLoading(false);
+
+    if (res.success) {
+      setChartData(res?.data?.stats);
+      setTransactions(res?.data?.transactions);
+    } else {
+      Alert.alert("Error", res.msg);
+    }
   };
 
   const getYearlyStats = async () => {
-    // jaarlijkse stats ophalen
+    setChartLoading(true);
+    let res = await fetchYearlyStats(user?.uid as string);
+    setChartLoading(false);
+
+    if (res.success) {
+      setChartData(res?.data?.stats);
+      setTransactions(res?.data?.transactions);
+    } else {
+      Alert.alert("Error", res.msg);
+    }
   };
 
   return (
@@ -111,6 +135,16 @@ const Statistics = () => {
                 <Loading color={colors.white} />
               </View>
             )}
+          </View>
+
+          {/*Transactions*/}
+
+          <View>
+            <TransactionList
+              title="Transactions"
+              emptyListMessage="No transactions found"
+              data={transactions}
+            />
           </View>
         </ScrollView>
       </View>
