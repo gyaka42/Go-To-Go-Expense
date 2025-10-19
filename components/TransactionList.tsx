@@ -1,5 +1,6 @@
 import { expenseCategories, incomeCategory } from "@/constants/data";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { useLocalization } from "@/contexts/localizationContext";
 import {
   TransactionItemProps,
   TransactionListType,
@@ -90,7 +91,10 @@ const TransactionItem = ({
       ? incomeCategory
       : expenseCategories[item.category!];
   const IconComponent = category.icon;
-
+  const { t } = useLocalization();
+  const categoryLabel = category.labelKey
+    ? t(category.labelKey)
+    : category.label;
   // Determine device locale with NL fallback and robust date conversion
   const rawDate = (item as any)?.date;
   const d =
@@ -128,7 +132,7 @@ const TransactionItem = ({
         </View>
 
         <View style={styles.categoryDes}>
-          <Typo size={17}>{category.label}</Typo>
+          <Typo size={17}>{categoryLabel}</Typo>
           <Typo
             size={12}
             color={colors.neutral400}

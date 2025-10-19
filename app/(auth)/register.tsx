@@ -5,6 +5,7 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
 import * as Icons from "phosphor-react-native";
@@ -18,10 +19,11 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { register: registerUser } = useAuth();
+  const { t } = useLocalization();
 
   const handleSubmit = async () => {
     if (!emailRef.current || !passwordRef.current || !nameRef.current) {
-      Alert.alert("Aanmelden", "Alle velden vullen ");
+      Alert.alert(t("auth.register.title"), t("auth.common.fillFields"));
       return;
     }
     setIsLoading(true);
@@ -33,7 +35,7 @@ const Register = () => {
     setIsLoading(false);
     console.log("register result", res);
     if (!res.success) {
-      Alert.alert("Registreer", res.msg);
+      Alert.alert(t("auth.register.title"), res.msg);
     }
   };
 
@@ -45,20 +47,20 @@ const Register = () => {
 
         <View style={{ gap: 5, marginTop: spacingY._20 }}>
           <Typo size={30} fontWeight={"800"}>
-            Laten we
+            {t("auth.register.headingLine1")}
           </Typo>
           <Typo size={30} fontWeight={"800"}>
-            Beginnen
+            {t("auth.register.headingLine2")}
           </Typo>
         </View>
         {/* hier komt Form */}
         <View style={styles.form}>
           <Typo size={16} color={colors.textLighter}>
-            Registreer je en volg je uitgaven
+            {t("auth.register.subtitle")}
           </Typo>
           {/* Hier komt Input */}
           <Input
-            placeholder="Naam invoeren"
+            placeholder={t("auth.register.namePlaceholder")}
             onChangeText={(value) => (nameRef.current = value)}
             icon={
               <Icons.UserIcon
@@ -69,7 +71,7 @@ const Register = () => {
             }
           />
           <Input
-            placeholder="Email adres invoeren"
+            placeholder={t("auth.common.emailPlaceholder")}
             onChangeText={(value) => (emailRef.current = value)}
             icon={
               <Icons.AtIcon
@@ -79,7 +81,7 @@ const Register = () => {
             }
           />
           <Input
-            placeholder="Wachtwoord invoeren"
+            placeholder={t("auth.common.passwordPlaceholder")}
             secureTextEntry
             onChangeText={(value) => (passwordRef.current = value)}
             icon={
@@ -93,7 +95,7 @@ const Register = () => {
 
           <Button loading={isLoading} onPress={handleSubmit}>
             <Typo fontWeight={"700"} color={colors.black} size={21}>
-              Registreren
+              {t("auth.register.submit")}
             </Typo>
           </Button>
         </View>
@@ -101,10 +103,10 @@ const Register = () => {
         {/* Footer komt hier */}
 
         <View style={styles.footer}>
-          <Typo size={15}>Heb je al een account?</Typo>
+          <Typo size={15}>{t("auth.register.haveAccountQuestion")}</Typo>
           <Pressable onPress={() => router.navigate("/(auth)/login")}>
             <Typo size={15} fontWeight={"700"} color={colors.primaryLight}>
-              Login
+              {t("auth.register.goToLogin")}
             </Typo>
           </Pressable>
         </View>

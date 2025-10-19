@@ -3,16 +3,19 @@ import Header from "@/components/Header";
 import ModalWrapper from "@/components/ModalWrapper";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
+import { useLocalization } from "@/contexts/localizationContext";
 import { verticalScale } from "@/utils/styling";
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 const PrivacyPolicyModal = () => {
+  const { t } = useLocalization();
+
   return (
     <ModalWrapper>
       <View style={styles.container}>
         <Header
-          title="Privacy Policy"
+          title={t("profile.options.privacyPolicy")}
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._10 }}
         />

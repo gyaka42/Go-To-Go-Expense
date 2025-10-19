@@ -5,6 +5,7 @@ import TransactionList from "@/components/TransactionList";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import useFetchData from "@/hooks/useFetchData";
 import { TransactionType } from "@/types";
 import { verticalScale } from "@/utils/styling";
@@ -17,6 +18,7 @@ import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 const Home = () => {
   const { user } = useAuth();
   const router = useRouter();
+  const { t } = useLocalization();
 
   const constraints = [
     where("uid", "==", user?.uid),
@@ -37,7 +39,7 @@ const Home = () => {
         <View style={styles.header}>
           <View style={{ gap: 4 }}>
             <Typo size={16} color={colors.neutral400}>
-              Hallo,
+              {t("home.greeting")}
             </Typo>
             <Typo size={20} fontWeight={"500"}>
               {user?.name}
@@ -68,8 +70,8 @@ const Home = () => {
           <TransactionList
             data={recentTransactions}
             loading={loadingTransactions}
-            title="Recente Transacties"
-            emptyListMessage="Geen transacties te zien nog!"
+            title={t("home.recentTransactionsTitle")}
+            emptyListMessage={t("home.noTransactions")}
           />
         </ScrollView>
 

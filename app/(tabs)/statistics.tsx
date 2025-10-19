@@ -4,6 +4,7 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import TransactionList from "@/components/TransactionList";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import {
   fetchMonthlyStats,
   fetchWeeklyStats,
@@ -21,6 +22,7 @@ const Statistics = () => {
   const [chartData, setChartData] = useState([]);
   const [chartLoading, setChartLoading] = useState(false);
   const [transactions, setTransactions] = useState([]);
+  const { t } = useLocalization();
 
   useEffect(() => {
     if (activeIndex === 0) {
@@ -43,7 +45,7 @@ const Statistics = () => {
       setChartData(res?.data?.stats);
       setTransactions(res?.data?.transactions);
     } else {
-      Alert.alert("Error", res.msg);
+      Alert.alert(t("common.error"), res.msg);
     }
   };
 
@@ -56,7 +58,7 @@ const Statistics = () => {
       setChartData(res?.data?.stats);
       setTransactions(res?.data?.transactions);
     } else {
-      Alert.alert("Error", res.msg);
+      Alert.alert(t("common.error"), res.msg);
     }
   };
 
@@ -69,7 +71,7 @@ const Statistics = () => {
       setChartData(res?.data?.stats);
       setTransactions(res?.data?.transactions);
     } else {
-      Alert.alert("Error", res.msg);
+      Alert.alert(t("common.error"), res.msg);
     }
   };
 
@@ -77,7 +79,7 @@ const Statistics = () => {
     <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Header title="Statistieken" />
+          <Header title={t("statistics.title")} />
         </View>
         <ScrollView
           contentContainerStyle={{
@@ -88,7 +90,11 @@ const Statistics = () => {
           showsVerticalScrollIndicator={false}
         >
           <SegmentedControl
-            values={["Wekelijks", "Maandelijks", "Jaarlijks"]}
+            values={[
+              t("statistics.segments.weekly"),
+              t("statistics.segments.monthly"),
+              t("statistics.segments.yearly"),
+            ]}
             selectedIndex={activeIndex}
             onChange={(event) => {
               setActiveIndex(event.nativeEvent.selectedSegmentIndex);
@@ -141,8 +147,8 @@ const Statistics = () => {
 
           <View>
             <TransactionList
-              title="Transactions"
-              emptyListMessage="No transactions found"
+              title={t("statistics.transactionsTitle")}
+              emptyListMessage={t("statistics.transactionsEmpty")}
               data={transactions}
             />
           </View>

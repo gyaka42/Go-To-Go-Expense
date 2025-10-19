@@ -4,6 +4,7 @@ import Typo from "@/components/Typo";
 import WalletListItem from "@/components/WalletListItem";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import useFetchData from "@/hooks/useFetchData";
 import { WalletType } from "@/types";
 import { verticalScale } from "@/utils/styling";
@@ -16,7 +17,7 @@ import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 const Wallet = () => {
   const router = useRouter();
   const { user } = useAuth();
-
+  const { t } = useLocalization();
   const constraints = useMemo(() => {
     if (!user?.uid) return [];
     return [where("uid", "==", user.uid), orderBy("created", "desc")];
@@ -46,7 +47,7 @@ const Wallet = () => {
               € {getTotalBalance()?.toFixed(2)},-
             </Typo>
             <Typo size={16} color={colors.neutral300}>
-              Totaal Bedrag
+              {t("wallet.totalAmount")}
             </Typo>
           </View>
         </View>
@@ -56,7 +57,7 @@ const Wallet = () => {
           {/* header wallet */}
           <View style={styles.flexRow}>
             <Typo size={20} fontWeight={"500"}>
-              Mijn Wallets
+              {t("wallet.myWallets")}
             </Typo>
             <TouchableOpacity
               onPress={() => router.push("/(modals)/walletModal")}
@@ -71,7 +72,9 @@ const Wallet = () => {
 
           {/* nog te doen: Wallet list */}
           {error ? (
-            <Typo color="red">Fout: {error}</Typo>
+            <Typo color="red">
+              {t("wallet.errorPrefix")}: {error}
+            </Typo>
           ) : loading ? (
             <Loading />
           ) : (
@@ -83,7 +86,7 @@ const Wallet = () => {
               )}
               contentContainerStyle={styles.listStyle}
               ListEmptyComponent={
-                <Typo color={colors.neutral300}>Geen wallets gevonden.</Typo>
+                <Typo color={colors.neutral300}>{t("wallet.emptyList")}</Typo>
               }
             />
           )}

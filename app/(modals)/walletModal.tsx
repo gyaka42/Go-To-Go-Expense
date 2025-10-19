@@ -7,6 +7,7 @@ import ModalWrapper from "@/components/ModalWrapper";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import { createOrUpdateWallet, deleteWallet } from "@/services/walletService";
 import { WalletType } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
@@ -29,7 +30,8 @@ const WalletModal = () => {
     }
   }, []);
 
-  const { user, updateUserData } = useAuth();
+  const { user } = useAuth();
+  const { t } = useLocalization();
   const [loading, setLoading] = useState(false);
   const [wallet, setWallet] = useState<WalletType>({
     name: "",
@@ -39,7 +41,7 @@ const WalletModal = () => {
   const onSubmit = async () => {
     let { name, image } = wallet;
     if (!name.trim() || !image) {
-      Alert.alert("Wallet", "Vul alle velden in");
+      Alert.alert(t("wallet.modal.alertTitle"), t("auth.common.fillFields"));
       return;
     }
 
@@ -58,7 +60,7 @@ const WalletModal = () => {
     if (res.success) {
       router.back();
     } else {
-      Alert.alert("Wallet", res.msg);
+      Alert.alert(t("wallet.modal.alertTitle"), res.msg);
     }
   };
 
@@ -70,22 +72,22 @@ const WalletModal = () => {
     if (res.success) {
       router.back();
     } else {
-      Alert.alert("Wallet", res.msg);
+      Alert.alert(t("wallet.modal.alertTitle"), res.msg);
     }
   };
 
   const showDeleteAlert = () => {
     Alert.alert(
-      "Bevestiging",
-      "Weet je zeker dat je deze wallet wilt verwijderen? \nAlle gekoppelde transacties worden ook verwijderd",
+      t("common.confirmation"),
+      t("wallet.modal.deleteConfirmMessage"),
       [
         {
-          text: "Annuleren",
+          text: t("common.cancel"),
           onPress: () => console.log("Annuleer verwijderen"),
           style: "cancel",
         },
         {
-          text: "Verwijderen",
+          text: t("common.delete"),
           onPress: () => onDelete(),
           style: "destructive",
         },
@@ -97,28 +99,32 @@ const WalletModal = () => {
     <ModalWrapper>
       <View style={styles.container}>
         <Header
-          title={oldWallet?.id ? "Update Wallet" : "Nieuwe Wallet"}
+          title={
+            oldWallet?.id
+              ? t("wallet.modal.titleEdit")
+              : t("wallet.modal.titleNew")
+          }
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._10 }}
         />
         {/* Form */}
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300}>Wallet Naam</Typo>
+            <Typo color={colors.neutral300}>{t("wallet.modal.nameLabel")}</Typo>
             <Input
-              placeholder="Salaris"
+              placeholder={t("wallet.modal.namePlaceholder")}
               value={wallet.name}
               onChangeText={(value) => setWallet({ ...wallet, name: value })}
             />
           </View>
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300}>Wallet Icoon</Typo>
+            <Typo color={colors.neutral300}>{t("wallet.modal.iconLabel")}</Typo>
             {/* image input */}
             <ImageUpload
               file={wallet.image}
               onClear={() => setWallet({ ...wallet, image: null })}
               onSelect={(file) => setWallet({ ...wallet, image: file })}
-              placeholder="Upload Afbeelding"
+              placeholder={t("wallet.modal.imagePlaceholder")}
             />
           </View>
         </ScrollView>
@@ -143,7 +149,9 @@ const WalletModal = () => {
         )}
         <Button loading={loading} onPress={onSubmit} style={{ flex: 1 }}>
           <Typo size={18} color={colors.black} fontWeight={"600"}>
-            {oldWallet?.id ? "Update" : "Toevoegen"}
+            {oldWallet?.id
+              ? t("wallet.modal.submitUpdate")
+              : t("wallet.modal.submitCreate")}
           </Typo>
         </Button>
       </View>

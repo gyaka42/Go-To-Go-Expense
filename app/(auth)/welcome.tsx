@@ -2,6 +2,7 @@ import Button from "@/components/Button";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
+import { useLocalization } from "@/contexts/localizationContext";
 import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -9,6 +10,8 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
 const Welcome = () => {
+  const { t } = useLocalization();
+
   const router = useRouter();
   return (
     <ScreenWrapper>
@@ -19,7 +22,7 @@ const Welcome = () => {
             onPress={() => router.push("/(auth)/login")}
             style={styles.loginButton}
           >
-            <Typo fontWeight={"500"}>Inloggen</Typo>
+            <Typo fontWeight={"500"}>{t("welcome.login")}</Typo>
           </TouchableOpacity>
           <Animated.Image
             entering={FadeIn.duration(800)}
@@ -39,10 +42,10 @@ const Welcome = () => {
             style={{ alignItems: "center" }}
           >
             <Typo size={30} fontWeight={"800"}>
-              Houd altijd grip
+              {t("welcome.headingLine1")}
             </Typo>
             <Typo size={30} fontWeight={"800"}>
-              op je financiën
+              {t("welcome.headingLine2")}
             </Typo>
           </Animated.View>
 
@@ -51,10 +54,10 @@ const Welcome = () => {
             style={{ alignItems: "center", gap: 2 }}
           >
             <Typo size={17} color={colors.textLight}>
-              Regel je geldzaken vandaag voor
+              {t("welcome.taglineLine1")}
             </Typo>
             <Typo size={17} color={colors.textLight}>
-              een zorgeloze levensstijl morgen
+              {t("welcome.taglineLine2")}
             </Typo>
           </Animated.View>
           <Animated.View
@@ -67,7 +70,7 @@ const Welcome = () => {
             {/* Button */}
             <Button onPress={() => router.push("/(auth)/register")}>
               <Typo size={22} color={colors.neutral900} fontWeight={"600"}>
-                Begin Nu
+                {t("welcome.primaryCta")}
               </Typo>
             </Button>
           </Animated.View>

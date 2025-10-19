@@ -5,6 +5,7 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
 import * as Icons from "phosphor-react-native";
@@ -17,17 +18,18 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login: loginUser } = useAuth();
+  const { t } = useLocalization();
 
   const handleSubmit = async () => {
     if (!emailRef.current || !passwordRef.current) {
-      Alert.alert("Inloggen", "Alle velden vullen ");
+      Alert.alert(t("auth.login.title"), t("auth.common.fillFields"));
       return;
     }
     setIsLoading(true);
     const res = await loginUser(emailRef.current, passwordRef.current);
     setIsLoading(false);
     if (!res.success) {
-      Alert.alert("Aanmelden", res.msg);
+      Alert.alert(t("auth.login.title"), res.msg);
     }
   };
 
@@ -39,7 +41,7 @@ const Login = () => {
 
         <View style={{ gap: 5, marginTop: spacingY._20 }}>
           <Typo size={30} fontWeight={"800"}>
-            Hallo,
+            {t("auth.login.greeting")}
           </Typo>
           <Typo size={30} fontWeight={"800"}>
             Welkom terug
@@ -52,7 +54,7 @@ const Login = () => {
           </Typo>
           {/* Hier komt Input */}
           <Input
-            placeholder="Email adres invoeren"
+            placeholder={t("auth.common.emailPlaceholder")}
             onChangeText={(value) => (emailRef.current = value)}
             icon={
               <Icons.AtIcon
@@ -62,7 +64,7 @@ const Login = () => {
             }
           />
           <Input
-            placeholder="Wachtwoord invoeren"
+            placeholder={t("auth.common.passwordPlaceholder")}
             secureTextEntry
             onChangeText={(value) => (passwordRef.current = value)}
             icon={
@@ -73,12 +75,12 @@ const Login = () => {
             }
           />
           <Typo size={14} color={colors.text} style={{ alignSelf: "flex-end" }}>
-            Wachtwoord vergeten?
+            {t("auth.login.forgotPassword")}
           </Typo>
 
           <Button loading={isLoading} onPress={handleSubmit}>
             <Typo fontWeight={"700"} color={colors.black} size={21}>
-              Inloggen
+              {t("auth.login.submit")}
             </Typo>
           </Button>
         </View>
@@ -86,10 +88,10 @@ const Login = () => {
         {/* Footer komt hier */}
 
         <View style={styles.footer}>
-          <Typo size={15}>Nog geen account?</Typo>
+          <Typo size={15}>{t("auth.login.noAccountQuestion")}</Typo>
           <Pressable onPress={() => router.navigate("/(auth)/register")}>
             <Typo size={15} fontWeight={"700"} color={colors.primaryLight}>
-              Meld je aan
+              {t("auth.login.goToRegister")}
             </Typo>
           </Pressable>
         </View>

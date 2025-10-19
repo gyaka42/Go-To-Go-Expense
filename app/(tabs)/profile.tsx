@@ -4,6 +4,7 @@ import Typo from "@/components/Typo";
 import { auth } from "@/config/firebase";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import { getProfileImage } from "@/services/imageService";
 import { accountOptionType } from "@/types";
 import { verticalScale } from "@/utils/styling";
@@ -17,30 +18,34 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 const Profile = () => {
   const { user } = useAuth();
-
+  const { t } = useLocalization();
   const router = useRouter();
 
   const accountOptions: accountOptionType[] = [
     {
-      title: "Bewerk Profiel",
+      key: "editProfile",
+      titleKey: "profile.options.editProfile",
       icon: <Icons.UserIcon size={26} color={colors.white} weight="fill" />,
       routeName: "/(modals)/profileModal",
       bgColor: "#6366f1",
     },
     {
-      title: "Instellingen",
+      key: "settings",
+      titleKey: "profile.options.settings",
       icon: <Icons.GearSixIcon size={26} color={colors.white} weight="fill" />,
       routeName: "/(modals)/settingsModal",
       bgColor: "#059669",
     },
     {
-      title: "Privacy Policy",
+      key: "privacy",
+      titleKey: "profile.options.privacyPolicy",
       icon: <Icons.LockIcon size={26} color={colors.white} weight="fill" />,
       routeName: "/(modals)/privacyPolicyModal",
       bgColor: colors.neutral600,
     },
     {
-      title: "Uitloggen",
+      key: "logout",
+      titleKey: "profile.options.logout",
       icon: <Icons.SignOutIcon size={26} color={colors.white} weight="fill" />,
       //routeName: "/(modals)/profileModal",
       bgColor: "#e11d48",
@@ -52,22 +57,26 @@ const Profile = () => {
   };
 
   const showLogoutAlert = () => {
-    Alert.alert("Bevestiging", "Weet je zeker dat je wilt uitloggen", [
-      {
-        text: "Annuleren",
-        onPress: () => console.log("Annuleer uitloggen"),
-        style: "cancel",
-      },
-      {
-        text: "Uitloggen",
-        onPress: () => handleLogout(),
-        style: "destructive",
-      },
-    ]);
+    Alert.alert(
+      t("common.confirmation"),
+      t("profile.logout.confirmationMessage"),
+      [
+        {
+          text: t("common.cancel"),
+          onPress: () => console.log("Annuleer uitloggen"),
+          style: "cancel",
+        },
+        {
+          text: t("profile.logout.confirm"),
+          onPress: () => handleLogout(),
+          style: "destructive",
+        },
+      ]
+    );
   };
 
   const handlePress = (item: accountOptionType) => {
-    if (item.title === "Uitloggen") {
+    if (item.key === "logout") {
       showLogoutAlert();
     }
 
@@ -78,7 +87,10 @@ const Profile = () => {
     <ScreenWrapper>
       <View style={styles.contiainer}>
         {/* header  */}
-        <Header title="Profiel" style={{ marginVertical: spacingY._10 }} />
+        <Header
+          title={t("profile.title")}
+          style={{ marginVertical: spacingY._10 }}
+        />
 
         {/* user information */}
         <View style={styles.userInfo}>
@@ -130,7 +142,7 @@ const Profile = () => {
                     {item.icon && item.icon}
                   </View>
                   <Typo size={16} style={{ flex: 1 }} fontWeight={"500"}>
-                    {item.title}
+                    {t(item.titleKey)}
                   </Typo>
                   <Icons.CaretRightIcon
                     size={verticalScale(20)}

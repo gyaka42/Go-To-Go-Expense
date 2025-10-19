@@ -8,6 +8,7 @@ import Typo from "@/components/Typo";
 import { expenseCategories, transactionTypes } from "@/constants/data";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import useFetchData from "@/hooks/useFetchData";
 import {
   createOrUpdateTransaction,
@@ -62,6 +63,8 @@ const TransactionModal = () => {
     }
   }, []);
 
+  const { t } = useLocalization();
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const { user, updateUserData } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -80,11 +83,27 @@ const TransactionModal = () => {
     return [where("uid", "==", user.uid), orderBy("created", "desc")];
   }, [user?.uid]);
 
-  const {
-    data: wallets,
-    loading: walletLoading,
-    error: walletError,
-  } = useFetchData<WalletType>("wallets", constraints, [user?.uid]);
+  const { data: wallets } = useFetchData<WalletType>("wallets", constraints, [
+    user?.uid,
+  ]);
+
+  const transactionTypeOptions = useMemo(
+    () =>
+      transactionTypes.map((option) => ({
+        ...option,
+        label: option.labelKey ? t(option.labelKey) : option.label,
+      })),
+    [t]
+  );
+
+  const expenseCategoryOptions = useMemo(
+    () =>
+      Object.values(expenseCategories).map((category) => ({
+        ...category,
+        label: category.labelKey ? t(category.labelKey) : category.label,
+      })),
+    [t]
+  );
 
   const onDateChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate || transaction.date;
@@ -96,7 +115,10 @@ const TransactionModal = () => {
       transaction;
 
     if (!walletId || !date || !amount || (type === "expense" && !category)) {
-      Alert.alert("Transactie", "Vul alle velden AUB");
+      Alert.alert(
+        t("transactionModal.alertTitle"),
+        t("auth.common.fillFields")
+      );
       return;
     }
 
@@ -120,7 +142,7 @@ const TransactionModal = () => {
     if (res.success) {
       router.back();
     } else {
-      Alert.alert("Transactie", res.msg);
+      Alert.alert(t("transactionModal.alertTitle"), res.msg);
     }
   };
 
@@ -135,22 +157,22 @@ const TransactionModal = () => {
     if (res.success) {
       router.back();
     } else {
-      Alert.alert("Transaction", res.msg);
+      Alert.alert(t("transactionModal.alertTitle"), res.msg);
     }
   };
 
   const showDeleteAlert = () => {
     Alert.alert(
-      "Bevestiging",
-      "Weet je zeker dat je deze transactie wilt verwijderen?",
+      t("common.confirmation"),
+      t("transactionModal.deleteConfirmMessage"),
       [
         {
-          text: "Annuleren",
+          text: t("common.cancel"),
           onPress: () => console.log("Annuleer verwijderen"),
           style: "cancel",
         },
         {
-          text: "Verwijderen",
+          text: t("common.delete"),
           onPress: () => onDelete(),
           style: "destructive",
         },
@@ -162,7 +184,11 @@ const TransactionModal = () => {
     <ModalWrapper>
       <View style={styles.container}>
         <Header
-          title={oldTransaction?.id ? "Update Transactie" : "Nieuwe Transactie"}
+          title={
+            oldTransaction?.id
+              ? t("transactionModal.titleEdit")
+              : t("transactionModal.titleNew")
+          }
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._10 }}
         />
@@ -174,7 +200,7 @@ const TransactionModal = () => {
           {/* Transaction Type */}
           <View style={styles.inputContainer}>
             <Typo color={colors.neutral300} size={16}>
-              Type
+              {t("transactionModal.typeLabel")}
             </Typo>
             {/* DROPDOWN MENU */}
             <Dropdown
@@ -183,7 +209,7 @@ const TransactionModal = () => {
               //placeholderStyle={styles.dropdownPlaceholder}
               selectedTextStyle={styles.dropdownSelectedText}
               iconStyle={styles.dropdownIcon}
-              data={transactionTypes}
+              data={transactionTypeOptions}
               maxHeight={300}
               labelField="label"
               valueField="value"
@@ -200,7 +226,7 @@ const TransactionModal = () => {
           {/* Wallet input */}
           <View style={styles.inputContainer}>
             <Typo color={colors.neutral300} size={16}>
-              Wallet
+              {t("transactionModal.walletLabel")}
             </Typo>
             {/* DROPDOWN MENU */}
             <Dropdown
@@ -210,7 +236,9 @@ const TransactionModal = () => {
               selectedTextStyle={styles.dropdownSelectedText}
               iconStyle={styles.dropdownIcon}
               data={wallets.map((wallet) => ({
-                label: `${wallet?.name} ($${wallet.amount})`,
+                label: `${wallet?.name} (€${Number(wallet.amount ?? 0).toFixed(
+                  2
+                )})`,
                 value: wallet?.id,
               }))}
               maxHeight={300}
@@ -219,7 +247,7 @@ const TransactionModal = () => {
               itemTextStyle={styles.dropdownItemText}
               itemContainerStyle={styles.dropdownItemContainer}
               containerStyle={styles.dropdownListContainer}
-              placeholder={"Selecteer Wallet"}
+              placeholder={t("transactionModal.walletPlaceholder")}
               value={transaction.walletId}
               onChange={(item) => {
                 setTransaction({ ...transaction, walletId: item.value || "" });
@@ -231,7 +259,7 @@ const TransactionModal = () => {
           {transaction.type === "expense" && (
             <View style={styles.inputContainer}>
               <Typo color={colors.neutral300} size={16}>
-                Uitgaven Categorie
+                {t("transactionModal.categoryLabel")}
               </Typo>
               {/* DROPDOWN MENU */}
               <Dropdown
@@ -240,14 +268,14 @@ const TransactionModal = () => {
                 placeholderStyle={styles.dropdownPlaceholder}
                 selectedTextStyle={styles.dropdownSelectedText}
                 iconStyle={styles.dropdownIcon}
-                data={Object.values(expenseCategories)}
+                data={expenseCategoryOptions}
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
                 itemTextStyle={styles.dropdownItemText}
                 itemContainerStyle={styles.dropdownItemContainer}
                 containerStyle={styles.dropdownListContainer}
-                placeholder={"Selecteer Categorie"}
+                placeholder={t("transactionModal.categoryPlaceholder")}
                 value={transaction.category}
                 onChange={(item) => {
                   setTransaction({
@@ -263,7 +291,7 @@ const TransactionModal = () => {
 
           <View style={styles.inputContainer}>
             <Typo color={colors.neutral300} size={16}>
-              Datum
+              {t("transactionModal.dateLabel")}
             </Typo>
             {/* Date input */}
             {!showDatePicker && (
@@ -293,7 +321,7 @@ const TransactionModal = () => {
                     onPress={() => setShowDatePicker(false)}
                   >
                     <Typo size={15} fontWeight={"500"}>
-                      Ok
+                      {t("common.ok")}
                     </Typo>
                   </TouchableOpacity>
                 )}
@@ -305,7 +333,7 @@ const TransactionModal = () => {
 
           <View style={styles.inputContainer}>
             <Typo color={colors.neutral300} size={16}>
-              Bedrag
+              {t("transactionModal.amountLabel")}
             </Typo>
             <Input
               keyboardType="numeric"
@@ -322,10 +350,10 @@ const TransactionModal = () => {
           <View style={styles.inputContainer}>
             <View style={styles.flexRow}>
               <Typo color={colors.neutral300} size={16}>
-                Omschrijving
+                {t("transactionModal.descriptionLabel")}
               </Typo>
               <Typo color={colors.neutral500} size={14}>
-                (optional)
+                {t("transactionModal.optional")}
               </Typo>
             </View>
 
@@ -350,10 +378,10 @@ const TransactionModal = () => {
           <View style={styles.inputContainer}>
             <View style={styles.flexRow}>
               <Typo color={colors.neutral300} size={16}>
-                Bon/Factuur
+                {t("transactionModal.receiptLabel")}
               </Typo>
               <Typo color={colors.neutral500} size={14}>
-                (optional)
+                {t("transactionModal.optional")}
               </Typo>
             </View>
             {/* image input */}
@@ -363,7 +391,7 @@ const TransactionModal = () => {
               onSelect={(file) =>
                 setTransaction({ ...transaction, image: file })
               }
-              placeholder="Upload Afbeelding"
+              placeholder={t("wallet.modal.imagePlaceholder")}
             />
           </View>
         </ScrollView>
@@ -388,7 +416,9 @@ const TransactionModal = () => {
         )}
         <Button loading={loading} onPress={onSubmit} style={{ flex: 1 }}>
           <Typo size={18} color={colors.black} fontWeight={"600"}>
-            {oldTransaction?.id ? "Update" : "Toevoegen"}
+            {oldTransaction?.id
+              ? t("transactionModal.submitUpdate")
+              : t("transactionModal.submitCreate")}
           </Typo>
         </Button>
       </View>

@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/contexts/authContext";
+import { LocalizationProvider } from "@/contexts/localizationContext";
 import { Stack } from "expo-router";
 import React from "react";
 
@@ -47,8 +48,10 @@ const StackLayout = () => {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <StackLayout />
-    </AuthProvider>
+    <LocalizationProvider>
+      <AuthProvider>
+        <StackLayout />
+      </AuthProvider>
+    </LocalizationProvider>
   );
 }

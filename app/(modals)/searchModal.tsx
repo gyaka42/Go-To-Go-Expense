@@ -5,6 +5,7 @@ import ModalWrapper from "@/components/ModalWrapper";
 import TransactionList from "@/components/TransactionList";
 import { colors, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import useFetchData from "@/hooks/useFetchData";
 import { TransactionType } from "@/types";
 import { useRouter } from "expo-router";
@@ -14,8 +15,9 @@ import { ScrollView, StyleSheet, View } from "react-native";
 
 const SearchModal = () => {
   const router = useRouter();
-  const { user, updateUserData } = useAuth();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
+  const { t } = useLocalization();
 
   const constraints = [where("uid", "==", user?.uid), orderBy("date", "desc")];
 
@@ -43,7 +45,7 @@ const SearchModal = () => {
     <ModalWrapper style={{ backgroundColor: colors.neutral900 }}>
       <View style={styles.container}>
         <Header
-          title={"Search"}
+          title={t("search.title")}
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._10 }}
         />
@@ -51,7 +53,7 @@ const SearchModal = () => {
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.inputContainer}>
             <Input
-              placeholder="Boodschappen..."
+              placeholder={t("search.placeholder")}
               value={search}
               placeholderTextColor={colors.neutral400}
               containerStyle={{ backgroundColor: colors.neutral800 }}
@@ -63,7 +65,7 @@ const SearchModal = () => {
             <TransactionList
               loading={transactionsLoading}
               data={filteredTransactions}
-              emptyListMessage="No transactions match your search"
+              emptyListMessage={t("search.empty")}
             />
           </View>
         </ScrollView>

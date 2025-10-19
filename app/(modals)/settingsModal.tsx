@@ -3,6 +3,8 @@ import Header from "@/components/Header";
 import ModalWrapper from "@/components/ModalWrapper";
 import Typo from "@/components/Typo";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { LanguageCode } from "@/constants/translations";
+import { useLocalization } from "@/contexts/localizationContext";
 import { scale, verticalScale } from "@/utils/styling";
 import * as Icons from "phosphor-react-native";
 import React, { useState } from "react";
@@ -14,7 +16,7 @@ import {
   View,
 } from "react-native";
 
-const languages = [
+const languages: { code: LanguageCode; label: string }[] = [
   { code: "NL", label: "Nederlands" },
   { code: "TR", label: "Türkçe" },
   { code: "EN", label: "English" },
@@ -22,14 +24,15 @@ const languages = [
 ];
 
 const SettingsModal = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState("NL");
+  const { language, setLanguage, t } = useLocalization();
+
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   return (
     <ModalWrapper>
       <View style={styles.container}>
         <Header
-          title="Instellingen"
+          title={t("settings.title")}
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._15 }}
         />
@@ -37,17 +40,19 @@ const SettingsModal = () => {
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.section}>
             <Typo size={18} fontWeight={"600"}>
-              Taal
+              {t("settings.languageTitle")}
             </Typo>
-            <Typo color={colors.neutral400}>Kies je voorkeurstaal</Typo>
+            <Typo color={colors.neutral400}>
+              {t("settings.languageSubtitle")}
+            </Typo>
             <View style={styles.languageList}>
-              {languages.map((language) => {
-                const isSelected = selectedLanguage === language.code;
+              {languages.map((option) => {
+                const isSelected = language === option.code;
                 return (
                   <TouchableOpacity
-                    key={language.code}
+                    key={option.code}
                     activeOpacity={0.8}
-                    onPress={() => setSelectedLanguage(language.code)}
+                    onPress={() => setLanguage(option.code)}
                     style={[
                       styles.languageOption,
                       isSelected && styles.languageOptionActive,
@@ -58,7 +63,7 @@ const SettingsModal = () => {
                       fontWeight={"500"}
                       color={isSelected ? colors.black : colors.white}
                     >
-                      {language.label}
+                      {option.label}
                     </Typo>
                     {isSelected && (
                       <Icons.CheckCircleIcon
@@ -75,15 +80,15 @@ const SettingsModal = () => {
 
           <View style={styles.section}>
             <Typo size={18} fontWeight={"600"}>
-              Thema
+              {t("settings.themeTitle")}
             </Typo>
             <View style={styles.themeRow}>
               <View style={{ flex: 1 }}>
                 <Typo size={16} fontWeight={"500"}>
-                  Donkere modus
+                  {t("settings.darkMode")}
                 </Typo>
                 <Typo color={colors.neutral400}>
-                  Schakel over tussen licht en donker
+                  {t("settings.darkModeDescription")}
                 </Typo>
               </View>
               <Switch

@@ -6,6 +6,7 @@ import ModalWrapper from "@/components/ModalWrapper";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import { getProfileImage } from "@/services/imageService";
 import { updateUser } from "@/services/userService";
 import { UserDataType } from "@/types";
@@ -31,6 +32,7 @@ const ProfileModal = () => {
     name: "",
     image: null,
   });
+  const { t } = useLocalization();
 
   useEffect(() => {
     setUserData({
@@ -55,7 +57,7 @@ const ProfileModal = () => {
   const onSubmit = async () => {
     let { name, image } = userData;
     if (!name.trim()) {
-      Alert.alert("Gebruiker", "Vul alle velden in");
+      Alert.alert(t("profileModal.alertTitle"), t("auth.common.fillFields"));
       return;
     }
 
@@ -74,7 +76,7 @@ const ProfileModal = () => {
     <ModalWrapper>
       <View style={styles.container}>
         <Header
-          title="Update Profiel"
+          title={t("profileModal.title")}
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._10 }}
         />
@@ -97,9 +99,9 @@ const ProfileModal = () => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300}>Naam</Typo>
+            <Typo color={colors.neutral300}>{t("profileModal.nameLabel")}</Typo>
             <Input
-              placeholder="Naam"
+              placeholder={t("profileModal.namePlaceholder")}
               value={userData.name}
               onChangeText={(value) =>
                 setUserData({ ...userData, name: value })
@@ -113,7 +115,7 @@ const ProfileModal = () => {
       <View style={styles.footer}>
         <Button loading={loading} onPress={onSubmit} style={{ flex: 1 }}>
           <Typo size={18} color={colors.black} fontWeight={"600"}>
-            Update
+            {t("profileModal.submit")}
           </Typo>
         </Button>
       </View>

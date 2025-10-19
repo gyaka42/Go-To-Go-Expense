@@ -1,5 +1,6 @@
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import { useLocalization } from "@/contexts/localizationContext";
 import useFetchData from "@/hooks/useFetchData";
 import { WalletType } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
@@ -11,7 +12,7 @@ import Typo from "./Typo";
 
 const HomeCard = () => {
   const { user } = useAuth();
-
+  const { t } = useLocalization();
   const constraints = useMemo(() => {
     if (!user?.uid) return [];
     return [where("uid", "==", user.uid), orderBy("created", "desc")];
@@ -49,7 +50,7 @@ const HomeCard = () => {
           {/* Totaal Balans */}
           <View style={styles.totalBalanceRow}>
             <Typo color={colors.neutral800} size={17} fontWeight={"500"}>
-              Totaal Saldo
+              {t("homeCard.totalBalance")}
             </Typo>
             <Icons.DotsThreeOutlineIcon
               size={verticalScale(23)}
@@ -75,7 +76,7 @@ const HomeCard = () => {
                 />
               </View>
               <Typo size={16} color={colors.neutral700} fontWeight={"500"}>
-                Inkomen
+                {t("homeCard.income")}
               </Typo>
             </View>
             <View style={{ alignSelf: "center" }}>
@@ -95,7 +96,7 @@ const HomeCard = () => {
                 />
               </View>
               <Typo size={16} color={colors.neutral700} fontWeight={"500"}>
-                Uitgaven
+                {t("homeCard.expenses")}
               </Typo>
             </View>
             <View style={{ alignSelf: "center" }}>
