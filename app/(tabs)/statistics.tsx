@@ -95,23 +95,28 @@ const Statistics = () => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <SegmentedControl
-            values={[
-              t("statistics.segments.weekly"),
-              t("statistics.segments.monthly"),
-              t("statistics.segments.yearly"),
-            ]}
-            selectedIndex={activeIndex}
-            onChange={(event) => {
-              setActiveIndex(event.nativeEvent.selectedSegmentIndex);
-            }}
-            tintColor={colors.primaryLight}
-            backgroundColor={colors.cardBackground}
-            appearance={isDarkMode ? "dark" : "light"}
-            activeFontStyle={styles.segmentFontStyle}
-            style={styles.segmentStyle}
-            fontStyle={{ ...styles.segmentFontStyle, color: colors.neutral400 }}
-          />
+          <View style={styles.segmentWrapper}>
+            <SegmentedControl
+              values={[
+                t("statistics.segments.weekly"),
+                t("statistics.segments.monthly"),
+                t("statistics.segments.yearly"),
+              ]}
+              selectedIndex={activeIndex}
+              onChange={(event) => {
+                setActiveIndex(event.nativeEvent.selectedSegmentIndex);
+              }}
+              tintColor={colors.primaryLight}
+              backgroundColor={colors.cardBackground}
+              appearance={isDarkMode ? "dark" : "light"}
+              activeFontStyle={styles.segmentFontStyle}
+              style={styles.segmentStyle}
+              fontStyle={{
+                ...styles.segmentFontStyle,
+                color: colors.neutral400,
+              }}
+            />
+          </View>
           <View style={styles.chartContainer}>
             {chartData.length > 0 ? (
               <BarChart
@@ -190,12 +195,19 @@ const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
       borderRadius: radius._12,
       borderCurve: "continuous",
     },
+    segmentWrapper: {
+      borderRadius: radius._20,
+      borderCurve: "continuous",
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+      overflow: "hidden",
+      width: "100%",
+    },
     segmentStyle: {
       height: scale(37),
       borderRadius: radius._12,
       borderCurve: "continuous",
-      borderWidth: 1,
-      borderColor: colors.borderColor,
+      width: "100%",
     },
     segmentFontStyle: {
       fontSize: verticalScale(13),
