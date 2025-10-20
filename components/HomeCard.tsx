@@ -1,6 +1,7 @@
-import { colors, spacingX, spacingY } from "@/constants/theme";
+import { ThemeColors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import useFetchData from "@/hooks/useFetchData";
 import { WalletType } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
@@ -13,6 +14,8 @@ import Typo from "./Typo";
 const HomeCard = () => {
   const { user } = useAuth();
   const { t } = useLocalization();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const constraints = useMemo(() => {
     if (!user?.uid) return [];
     return [where("uid", "==", user.uid), orderBy("created", "desc")];
@@ -71,7 +74,7 @@ const HomeCard = () => {
               <View style={styles.statsIcon}>
                 <Icons.ArrowDownIcon
                   size={verticalScale(15)}
-                  color={colors.black}
+                  color={colors.white}
                   weight="bold"
                 />
               </View>
@@ -91,7 +94,7 @@ const HomeCard = () => {
               <View style={styles.statsIcon}>
                 <Icons.ArrowUpIcon
                   size={verticalScale(15)}
-                  color={colors.black}
+                  color={colors.white}
                   weight="bold"
                 />
               </View>
@@ -113,37 +116,38 @@ const HomeCard = () => {
 
 export default HomeCard;
 
-const styles = StyleSheet.create({
-  bgImage: {
-    height: scale(210),
-    width: "100%",
-  },
-  container: {
-    padding: spacingX._20,
-    paddingHorizontal: scale(23),
-    height: "87%",
-    width: "100%",
-    justifyContent: "space-between",
-  },
-  totalBalanceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacingY._5,
-  },
-  stats: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  statsIcon: {
-    backgroundColor: colors.neutral350,
-    padding: spacingY._5,
-    borderRadius: 50,
-  },
-  incomeExpense: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacingY._7,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    bgImage: {
+      height: scale(210),
+      width: "100%",
+    },
+    container: {
+      padding: spacingX._20,
+      paddingHorizontal: scale(23),
+      height: "87%",
+      width: "100%",
+      justifyContent: "space-between",
+    },
+    totalBalanceRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: spacingY._5,
+    },
+    stats: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    statsIcon: {
+      backgroundColor: colors.neutral350,
+      padding: spacingY._5,
+      borderRadius: 50,
+    },
+    incomeExpense: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacingY._7,
+    },
+  });

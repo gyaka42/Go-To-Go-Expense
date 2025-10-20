@@ -3,9 +3,10 @@ import Header from "@/components/Header";
 import Input from "@/components/Input";
 import ModalWrapper from "@/components/ModalWrapper";
 import TransactionList from "@/components/TransactionList";
-import { colors, spacingY } from "@/constants/theme";
+import { ThemeColors, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import useFetchData from "@/hooks/useFetchData";
 import { TransactionType } from "@/types";
 import { useRouter } from "expo-router";
@@ -18,7 +19,8 @@ const SearchModal = () => {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const { t } = useLocalization();
-
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const constraints = [where("uid", "==", user?.uid), orderBy("date", "desc")];
 
   const {
@@ -42,7 +44,7 @@ const SearchModal = () => {
   });
 
   return (
-    <ModalWrapper style={{ backgroundColor: colors.neutral900 }}>
+    <ModalWrapper>
       <View style={styles.container}>
         <Header
           title={t("search.title")}
@@ -55,8 +57,6 @@ const SearchModal = () => {
             <Input
               placeholder={t("search.placeholder")}
               value={search}
-              placeholderTextColor={colors.neutral400}
-              containerStyle={{ backgroundColor: colors.neutral800 }}
               onChangeText={(value) => setSearch(value)}
             />
           </View>
@@ -76,23 +76,24 @@ const SearchModal = () => {
 
 export default SearchModal;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingHorizontal: spacingY._30,
-  },
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: "space-between",
+      paddingHorizontal: spacingY._30,
+    },
 
-  form: {
-    gap: spacingY._30,
-    marginTop: spacingY._15,
-  },
-  avatarContainer: {
-    position: "relative",
-    alignSelf: "center",
-  },
+    form: {
+      gap: spacingY._30,
+      marginTop: spacingY._15,
+    },
+    //. avatarContainer: {
+    //  position: "relative",
+    //  alignSelf: "center",
+    // },
 
-  inputContainer: {
-    gap: spacingY._10,
-  },
-});
+    inputContainer: {
+      gap: spacingY._10,
+    },
+  });

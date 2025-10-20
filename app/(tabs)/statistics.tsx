@@ -2,9 +2,10 @@ import Header from "@/components/Header";
 import Loading from "@/components/Loading";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import TransactionList from "@/components/TransactionList";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { ThemeColors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import {
   fetchMonthlyStats,
   fetchWeeklyStats,
@@ -23,6 +24,11 @@ const Statistics = () => {
   const [chartLoading, setChartLoading] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const { t } = useLocalization();
+  const { colors, isDarkMode } = useTheme();
+  const styles = React.useMemo(
+    () => createStyles(colors, isDarkMode),
+    [colors, isDarkMode]
+  );
 
   useEffect(() => {
     if (activeIndex === 0) {
@@ -99,12 +105,12 @@ const Statistics = () => {
             onChange={(event) => {
               setActiveIndex(event.nativeEvent.selectedSegmentIndex);
             }}
-            tintColor={colors.neutral200}
-            backgroundColor={colors.neutral900}
-            appearance="dark"
+            tintColor={colors.primaryLight}
+            backgroundColor={colors.cardBackground}
+            appearance={isDarkMode ? "dark" : "light"}
             activeFontStyle={styles.segmentFontStyle}
             style={styles.segmentStyle}
-            fontStyle={{ ...styles.segmentFontStyle, color: colors.white }}
+            fontStyle={{ ...styles.segmentFontStyle, color: colors.neutral400 }}
           />
           <View style={styles.chartContainer}>
             {chartData.length > 0 ? (
@@ -121,9 +127,9 @@ const Statistics = () => {
                 yAxisLabelWidth={
                   [1, 2].includes(activeIndex) ? scale(38) : scale(35)
                 }
-                yAxisTextStyle={{ color: colors.neutral350 }}
+                yAxisTextStyle={{ color: colors.neutral400 }}
                 xAxisLabelTextStyle={{
-                  color: colors.neutral350,
+                  color: colors.neutral400,
                   fontSize: verticalScale(12),
                 }}
                 noOfSections={3}
@@ -138,7 +144,7 @@ const Statistics = () => {
 
             {chartLoading && (
               <View style={styles.chartLoadingContainer}>
-                <Loading color={colors.white} />
+                <Loading color={colors.text} />
               </View>
             )}
           </View>
@@ -160,44 +166,45 @@ const Statistics = () => {
 
 export default Statistics;
 
-const styles = StyleSheet.create({
-  chartContainer: {
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  chartLoadingContainer: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    borderRadius: radius._12,
-    backgroundColor: "rgba(0,0,0, 0.6)",
-  },
-  header: {},
-  noChart: {
-    backgroundColor: "rgba(0,0,0, 0.6)",
-    height: verticalScale(210),
-  },
-  searchIcon: {
-    backgroundColor: colors.neutral700,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 100,
-    height: verticalScale(35),
-    width: verticalScale(35),
-    borderCurve: "continuous",
-  },
-  segmentStyle: {
-    height: scale(37),
-  },
-  segmentFontStyle: {
-    fontSize: verticalScale(13),
-    fontWeight: "bold",
-    color: colors.black,
-  },
-  container: {
-    paddingHorizontal: spacingX._20,
-    paddingVertical: spacingY._5,
-    gap: spacingY._10,
-  },
-});
+const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
+  StyleSheet.create({
+    chartContainer: {
+      position: "relative",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    chartLoadingContainer: {
+      position: "absolute",
+      width: "100%",
+      height: "100%",
+      borderRadius: radius._12,
+      backgroundColor: isDarkMode ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.15)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    header: {},
+    noChart: {
+      backgroundColor: colors.cardBackground,
+      height: verticalScale(210),
+      width: "100%",
+      borderRadius: radius._12,
+      borderCurve: "continuous",
+    },
+    segmentStyle: {
+      height: scale(37),
+      borderRadius: radius._12,
+      borderCurve: "continuous",
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+    },
+    segmentFontStyle: {
+      fontSize: verticalScale(13),
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    container: {
+      paddingHorizontal: spacingX._20,
+      paddingVertical: spacingY._5,
+      gap: spacingY._10,
+    },
+  });

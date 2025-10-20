@@ -1,6 +1,7 @@
 import { expenseCategories, incomeCategory } from "@/constants/data";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { ThemeColors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import {
   TransactionItemProps,
   TransactionListType,
@@ -23,7 +24,8 @@ const TransactionList = ({
   emptyListMessage,
 }: TransactionListType) => {
   const router = useRouter();
-
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const handleClick = (item: TransactionType) => {
     // open transactie details
     router.push({
@@ -86,6 +88,8 @@ const TransactionItem = ({
   index,
   handleClick,
 }: TransactionItemProps) => {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   let category =
     item?.type === "income"
       ? incomeCategory
@@ -161,39 +165,40 @@ const TransactionItem = ({
 
 export default TransactionList;
 
-const styles = StyleSheet.create({
-  container: {
-    gap: spacingY._17,
-  },
-  list: {
-    minHeight: 3,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: spacingX._12,
-    marginBottom: spacingY._12,
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      gap: spacingY._17,
+    },
+    list: {
+      minHeight: 3,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: spacingX._12,
+      marginBottom: spacingY._12,
 
-    backgroundColor: colors.neutral800,
-    padding: spacingY._10,
-    paddingHorizontal: spacingY._10,
-    borderRadius: radius._17,
-  },
-  icon: {
-    height: verticalScale(44),
-    aspectRatio: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: radius._12,
-    borderCurve: "continuous",
-  },
-  categoryDes: {
-    flex: 1,
-    gap: 2.5,
-  },
-  amountDate: {
-    alignItems: "flex-end",
-    gap: 3,
-  },
-});
+      backgroundColor: colors.cardBackground,
+      padding: spacingY._10,
+      paddingHorizontal: spacingY._10,
+      borderRadius: radius._17,
+    },
+    icon: {
+      height: verticalScale(44),
+      aspectRatio: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: radius._12,
+      borderCurve: "continuous",
+    },
+    categoryDes: {
+      flex: 1,
+      gap: 2.5,
+    },
+    amountDate: {
+      alignItems: "flex-end",
+      gap: 3,
+    },
+  });

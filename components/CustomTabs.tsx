@@ -1,7 +1,9 @@
-import { colors, spacingY } from "@/constants/theme";
+import { ThemeColors, spacingY } from "@/constants/theme";
+import { useTheme } from "@/contexts/themeContext";
 import { verticalScale } from "@/utils/styling";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import * as Icons from "phosphor-react-native";
+import React from "react";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export default function CustomTabs({
@@ -9,36 +11,41 @@ export default function CustomTabs({
   descriptors,
   navigation,
 }: BottomTabBarProps) {
-  const tabbarIcons: any = {
-    index: (isFocused: boolean) => (
-      <Icons.HouseSimpleIcon
-        size={verticalScale(30)}
-        weight={isFocused ? "fill" : "regular"}
-        color={isFocused ? colors.primaryLight : colors.neutral400}
-      />
-    ),
-    statistics: (isFocused: boolean) => (
-      <Icons.PresentationChartIcon
-        size={verticalScale(30)}
-        weight={isFocused ? "fill" : "regular"}
-        color={isFocused ? colors.primaryLight : colors.neutral400}
-      />
-    ),
-    wallet: (isFocused: boolean) => (
-      <Icons.WalletIcon
-        size={verticalScale(30)}
-        weight={isFocused ? "fill" : "regular"}
-        color={isFocused ? colors.primaryLight : colors.neutral400}
-      />
-    ),
-    profile: (isFocused: boolean) => (
-      <Icons.UserCircleGearIcon
-        size={verticalScale(30)}
-        weight={isFocused ? "fill" : "regular"}
-        color={isFocused ? colors.primaryLight : colors.neutral400}
-      />
-    ),
-  };
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const tabbarIcons: any = React.useMemo(
+    () => ({
+      index: (isFocused: boolean) => (
+        <Icons.HouseSimpleIcon
+          size={verticalScale(30)}
+          weight={isFocused ? "fill" : "regular"}
+          color={isFocused ? colors.primaryLight : colors.neutral400}
+        />
+      ),
+      statistics: (isFocused: boolean) => (
+        <Icons.PresentationChartIcon
+          size={verticalScale(30)}
+          weight={isFocused ? "fill" : "regular"}
+          color={isFocused ? colors.primaryLight : colors.neutral400}
+        />
+      ),
+      wallet: (isFocused: boolean) => (
+        <Icons.WalletIcon
+          size={verticalScale(30)}
+          weight={isFocused ? "fill" : "regular"}
+          color={isFocused ? colors.primaryLight : colors.neutral400}
+        />
+      ),
+      profile: (isFocused: boolean) => (
+        <Icons.UserCircleGearIcon
+          size={verticalScale(30)}
+          weight={isFocused ? "fill" : "regular"}
+          color={isFocused ? colors.primaryLight : colors.neutral400}
+        />
+      ),
+    }),
+    [colors]
+  );
   return (
     <View style={styles.tabbar}>
       {state.routes.map((route, index) => {
@@ -90,20 +97,21 @@ export default function CustomTabs({
   );
 }
 
-const styles = StyleSheet.create({
-  tabbar: {
-    flexDirection: "row",
-    width: "100%",
-    height: Platform.OS === "ios" ? verticalScale(73) : verticalScale(55),
-    backgroundColor: colors.neutral800,
-    alignItems: "center",
-    justifyContent: "space-around",
-    borderTopColor: colors.neutral700,
-    borderTopWidth: 1,
-  },
-  tabbarItem: {
-    marginBottom: Platform.OS === "ios" ? spacingY._10 : spacingY._5,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    tabbar: {
+      flexDirection: "row",
+      width: "100%",
+      height: Platform.OS === "ios" ? verticalScale(73) : verticalScale(55),
+      backgroundColor: colors.cardBackground,
+      alignItems: "center",
+      justifyContent: "space-around",
+      borderTopColor: colors.borderColor,
+      borderTopWidth: 1,
+    },
+    tabbarItem: {
+      marginBottom: Platform.OS === "ios" ? spacingY._10 : spacingY._5,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });

@@ -1,5 +1,5 @@
 import { auth, firestore } from "@/config/firebase";
-import { colors } from "@/constants/theme";
+import { darkColors as colors } from "@/constants/theme";
 import { ResponseType, TransactionType, WalletType } from "@/types";
 import { getLast12Months, getLast7Days, getYearsRange } from "@/utils/common";
 import { scale } from "@/utils/styling";

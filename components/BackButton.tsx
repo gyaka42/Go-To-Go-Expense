@@ -1,4 +1,5 @@
-import { colors, radius } from "@/constants/theme";
+import { ThemeColors, radius } from "@/constants/theme";
+import { useTheme } from "@/contexts/themeContext";
 import { BackButtonProps } from "@/types";
 import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
@@ -8,6 +9,8 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 
 const BackButton = ({ style, iconSize = 26 }: BackButtonProps) => {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   return (
     <TouchableOpacity
       onPress={() => router.back()}
@@ -15,7 +18,7 @@ const BackButton = ({ style, iconSize = 26 }: BackButtonProps) => {
     >
       <CaretCircleLeftIcon
         size={verticalScale(iconSize)}
-        color={colors.white}
+        color={colors.text}
         weight="duotone"
       />
     </TouchableOpacity>
@@ -24,12 +27,13 @@ const BackButton = ({ style, iconSize = 26 }: BackButtonProps) => {
 
 export default BackButton;
 
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: colors.neutral600,
-    alignSelf: "flex-start",
-    borderRadius: radius._15,
-    borderCurve: "continuous",
-    padding: 5,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    button: {
+      backgroundColor: colors.neutral600,
+      alignSelf: "flex-start",
+      borderRadius: radius._15,
+      borderCurve: "continuous",
+      padding: 5,
+    },
+  });

@@ -1,15 +1,11 @@
-import { colors } from "@/constants/theme";
+import { ThemeColors } from "@/constants/theme";
+import { useTheme } from "@/contexts/themeContext";
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 
 const Index = () => {
-  // const router = useRouter();
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     router.push("/(auth)/welcome");
-  //   }, 2000);
-  // }, []);
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={styles.container}>
@@ -24,15 +20,16 @@ const Index = () => {
 
 export default Index;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.neutral900,
-  },
-  logo: {
-    height: "20%",
-    aspectRatio: 1,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.appBackground,
+    },
+    logo: {
+      height: "20%",
+      aspectRatio: 1,
+    },
+  });

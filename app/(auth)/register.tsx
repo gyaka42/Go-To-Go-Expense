@@ -3,9 +3,10 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
-import { colors, spacingX, spacingY } from "@/constants/theme";
+import { ThemeColors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
 import * as Icons from "phosphor-react-native";
@@ -20,7 +21,8 @@ const Register = () => {
   const router = useRouter();
   const { register: registerUser } = useAuth();
   const { t } = useLocalization();
-
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const handleSubmit = async () => {
     if (!emailRef.current || !passwordRef.current || !nameRef.current) {
       Alert.alert(t("auth.register.title"), t("auth.common.fillFields"));
@@ -65,7 +67,7 @@ const Register = () => {
             icon={
               <Icons.UserIcon
                 size={verticalScale(26)}
-                color={colors.neutral300}
+                color={colors.neutral400}
                 weight="fill"
               />
             }
@@ -76,7 +78,7 @@ const Register = () => {
             icon={
               <Icons.AtIcon
                 size={verticalScale(26)}
-                color={colors.neutral300}
+                color={colors.neutral400}
               />
             }
           />
@@ -87,7 +89,7 @@ const Register = () => {
             icon={
               <Icons.LockIcon
                 size={verticalScale(26)}
-                color={colors.neutral300}
+                color={colors.neutral400}
                 weight="fill"
               />
             }
@@ -117,34 +119,25 @@ const Register = () => {
 
 export default Register;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    gap: spacingY._30,
-    paddingHorizontal: spacingX._20,
-  },
-  welcomeText: {
-    fontSize: verticalScale(20),
-    fontWeight: "bold",
-    color: colors.text,
-  },
-  form: {
-    gap: spacingY._20,
-  },
-  forgotPassword: {
-    textAlign: "right",
-    fontWeight: "500",
-    color: colors.text,
-  },
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
-  },
-  footerText: {
-    color: colors.text,
-    textAlign: "center",
-    fontSize: verticalScale(15),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      gap: spacingY._30,
+      paddingHorizontal: spacingX._20,
+    },
+    form: {
+      gap: spacingY._20,
+    },
+    footer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 5,
+    },
+    footerText: {
+      color: colors.text,
+      textAlign: "center",
+      fontSize: verticalScale(15),
+    },
+  });

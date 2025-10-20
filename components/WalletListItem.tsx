@@ -1,4 +1,5 @@
-import { colors, radius, spacingX } from "@/constants/theme";
+import { ThemeColors, radius, spacingX } from "@/constants/theme";
+import { useTheme } from "@/contexts/themeContext";
 import { WalletType } from "@/types";
 import { verticalScale } from "@/utils/styling";
 import { Image } from "expo-image";
@@ -18,6 +19,8 @@ const WalletListItem = ({
   index: number;
   router: Router;
 }) => {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const openWallet = () => {
     router.push({
       pathname: "/(modals)/walletModal",
@@ -52,7 +55,7 @@ const WalletListItem = ({
         <Icons.CaretRightIcon
           size={verticalScale(20)}
           weight="bold"
-          color={colors.white}
+          color={colors.neutral400}
         />
       </TouchableOpacity>
     </Animated.View>
@@ -61,24 +64,25 @@ const WalletListItem = ({
 
 export default WalletListItem;
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: verticalScale(17),
-  },
-  imageContainer: {
-    height: verticalScale(45),
-    width: verticalScale(45),
-    borderWidth: 1,
-    borderColor: colors.neutral600,
-    borderRadius: radius._12,
-    borderCurve: "continuous",
-    overflow: "hidden",
-  },
-  nameContainer: {
-    flex: 1,
-    gap: 2,
-    marginLeft: spacingX._10,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: verticalScale(17),
+    },
+    imageContainer: {
+      height: verticalScale(45),
+      width: verticalScale(45),
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+      borderRadius: radius._12,
+      borderCurve: "continuous",
+      overflow: "hidden",
+    },
+    nameContainer: {
+      flex: 1,
+      gap: 2,
+      marginLeft: spacingX._10,
+    },
+  });

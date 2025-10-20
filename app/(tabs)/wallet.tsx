@@ -2,9 +2,10 @@ import Loading from "@/components/Loading";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import WalletListItem from "@/components/WalletListItem";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { ThemeColors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import useFetchData from "@/hooks/useFetchData";
 import { WalletType } from "@/types";
 import { verticalScale } from "@/utils/styling";
@@ -18,6 +19,8 @@ const Wallet = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useLocalization();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const constraints = useMemo(() => {
     if (!user?.uid) return [];
     return [where("uid", "==", user.uid), orderBy("created", "desc")];
@@ -38,7 +41,7 @@ const Wallet = () => {
     }, 0);
 
   return (
-    <ScreenWrapper style={{ backgroundColor: colors.black }}>
+    <ScreenWrapper>
       <View style={styles.container}>
         {/* Balance view */}
         <View style={styles.balanceView}>
@@ -98,33 +101,36 @@ const Wallet = () => {
 
 export default Wallet;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  balanceView: {
-    height: verticalScale(160),
-    backgroundColor: colors.black,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  flexRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacingY._10,
-  },
-  wallets: {
-    flex: 1,
-    backgroundColor: colors.neutral900,
-    borderTopRightRadius: radius._30,
-    borderTopLeftRadius: radius._30,
-    padding: spacingX._20,
-    paddingTop: spacingX._25,
-  },
-  listStyle: {
-    paddingVertical: spacingY._25,
-    paddingTop: spacingY._15,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: "space-between",
+    },
+    balanceView: {
+      height: verticalScale(160),
+      backgroundColor: colors.cardBackground,
+      alignItems: "center",
+      justifyContent: "center",
+      borderBottomLeftRadius: radius._30,
+      borderBottomRightRadius: radius._30,
+    },
+    flexRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: spacingY._10,
+    },
+    wallets: {
+      flex: 1,
+      backgroundColor: colors.appBackground,
+      borderTopRightRadius: radius._30,
+      borderTopLeftRadius: radius._30,
+      padding: spacingX._20,
+      paddingTop: spacingX._25,
+    },
+    listStyle: {
+      paddingVertical: spacingY._25,
+      paddingTop: spacingY._15,
+    },
+  });

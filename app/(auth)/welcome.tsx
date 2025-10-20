@@ -1,8 +1,9 @@
 import Button from "@/components/Button";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
-import { colors, spacingX, spacingY } from "@/constants/theme";
+import { ThemeColors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -11,7 +12,8 @@ import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
 const Welcome = () => {
   const { t } = useLocalization();
-
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   return (
     <ScreenWrapper>
@@ -69,7 +71,7 @@ const Welcome = () => {
           >
             {/* Button */}
             <Button onPress={() => router.push("/(auth)/register")}>
-              <Typo size={22} color={colors.neutral900} fontWeight={"600"}>
+              <Typo size={22} color={colors.black} fontWeight={"600"}>
                 {t("welcome.primaryCta")}
               </Typo>
             </Button>
@@ -82,37 +84,40 @@ const Welcome = () => {
 
 export default Welcome;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingTop: spacingY._7,
-  },
-  welcomeImage: {
-    width: "100%",
-    height: verticalScale(300),
-    alignSelf: "center",
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: "space-between",
+      paddingTop: spacingY._7,
+    },
+    welcomeImage: {
+      width: "100%",
+      height: verticalScale(300),
+      alignSelf: "center",
 
-    marginTop: verticalScale(100),
-  },
-  loginButton: {
-    alignSelf: "flex-end",
-    marginRight: spacingX._20,
-  },
-  footer: {
-    backgroundColor: colors.neutral900,
-    alignItems: "center",
-    paddingTop: verticalScale(30),
-    paddingBottom: verticalScale(45),
-    gap: spacingY._20,
-    shadowColor: "white",
-    shadowOffset: { width: 0, height: -10 },
-    elevation: 10,
-    shadowRadius: 25,
-    shadowOpacity: 0.15,
-  },
-  buttonContainer: {
-    width: "100%",
-    paddingHorizontal: spacingX._25,
-  },
-});
+      marginTop: verticalScale(100),
+    },
+    loginButton: {
+      alignSelf: "flex-end",
+      marginRight: spacingX._20,
+    },
+    footer: {
+      backgroundColor: colors.cardBackground,
+      alignItems: "center",
+      paddingTop: verticalScale(30),
+      paddingBottom: verticalScale(45),
+      gap: spacingY._20,
+      shadowColor: colors.black,
+      shadowOffset: { width: 0, height: -10 },
+      elevation: 10,
+      shadowRadius: 25,
+      shadowOpacity: 0.15,
+      borderTopLeftRadius: radius._30,
+      borderTopRightRadius: radius._30,
+    },
+    buttonContainer: {
+      width: "100%",
+      paddingHorizontal: spacingX._25,
+    },
+  });

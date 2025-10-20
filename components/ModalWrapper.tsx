@@ -1,17 +1,16 @@
-import { colors, spacingY } from "@/constants/theme";
+import { spacingY } from "@/constants/theme";
+import { useTheme } from "@/contexts/themeContext";
 import { ModalWrapperProps } from "@/types";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 
 const isIos = Platform.OS === "ios";
 
-const ModalWrapper = ({
-  style,
-  children,
-  bg = colors.neutral800,
-}: ModalWrapperProps) => {
+const ModalWrapper = ({ style, children, bg }: ModalWrapperProps) => {
+  const { colors } = useTheme();
+  const backgroundColor = bg ?? colors.cardBackground;
   return (
-    <View style={[styles.container, { backgroundColor: bg }, style && style]}>
+    <View style={[styles.container, { backgroundColor }, style && style]}>
       {children}
     </View>
   );

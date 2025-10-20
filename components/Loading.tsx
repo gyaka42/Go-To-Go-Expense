@@ -1,23 +1,16 @@
-import { colors } from "@/constants/theme";
+import { useTheme } from "@/contexts/themeContext";
 import React from "react";
-import {
-  ActivityIndicator,
-  ActivityIndicatorProps,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ActivityIndicator, ActivityIndicatorProps, View } from "react-native";
 
-const Loading = ({
-  size = "large",
-  color = colors.primary,
-}: ActivityIndicatorProps) => {
+const Loading = ({ size = "large" }: ActivityIndicatorProps) => {
+  const { colors } = useTheme();
+
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <ActivityIndicator size={size} color={color} />
+      <ActivityIndicator size={size} color={colors.primary} />
+      {/* color={color ?? colors.primary} */}
     </View>
   );
 };
 
 export default Loading;
-
-const styles = StyleSheet.create({});

@@ -2,9 +2,10 @@ import Header from "@/components/Header";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { auth } from "@/config/firebase";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { ThemeColors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import { getProfileImage } from "@/services/imageService";
 import { accountOptionType } from "@/types";
 import { verticalScale } from "@/utils/styling";
@@ -20,6 +21,8 @@ const Profile = () => {
   const { user } = useAuth();
   const { t } = useLocalization();
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   const accountOptions: accountOptionType[] = [
     {
@@ -147,7 +150,7 @@ const Profile = () => {
                   <Icons.CaretRightIcon
                     size={verticalScale(20)}
                     weight="bold"
-                    color={colors.white}
+                    color={colors.neutral400}
                   />
                 </TouchableOpacity>
               </Animated.View>
@@ -161,64 +164,54 @@ const Profile = () => {
 
 export default Profile;
 
-const styles = StyleSheet.create({
-  contiainer: {
-    flex: 1,
-    paddingHorizontal: spacingX._20,
-  },
-  userInfo: {
-    marginTop: verticalScale(30),
-    alignItems: "center",
-    gap: spacingY._15,
-  },
-  avatarContainer: {
-    position: "relative",
-    alignSelf: "center",
-  },
-  avatar: {
-    alignSelf: "center",
-    backgroundColor: colors.neutral300,
-    height: verticalScale(135),
-    width: verticalScale(135),
-    borderRadius: 200,
-    //overflow: "hidden",
-    //position: "relative"
-  },
-  editIcon: {
-    position: "absolute",
-    bottom: 5,
-    right: 8,
-    borderRadius: 50,
-    backgroundColor: colors.neutral100,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
-    padding: 5,
-  },
-  nameContainer: {
-    gap: verticalScale(4),
-    alignItems: "center",
-  },
-  listIcon: {
-    height: verticalScale(44),
-    width: verticalScale(44),
-    backgroundColor: colors.neutral500,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radius._15,
-    borderCurve: "continuous",
-  },
-  listItem: {
-    marginBottom: verticalScale(17),
-  },
-  accountOptions: {
-    marginTop: spacingY._35,
-  },
-  flexRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacingX._10,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    contiainer: {
+      flex: 1,
+      paddingHorizontal: spacingX._20,
+    },
+    userInfo: {
+      marginTop: verticalScale(30),
+      alignItems: "center",
+      gap: spacingY._15,
+    },
+    avatarContainer: {
+      position: "relative",
+      alignSelf: "center",
+    },
+    avatar: {
+      alignSelf: "center",
+      backgroundColor: colors.cardBackground,
+      height: verticalScale(135),
+      width: verticalScale(135),
+      borderRadius: 200,
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+    },
+    nameContainer: {
+      gap: verticalScale(4),
+      alignItems: "center",
+    },
+    listIcon: {
+      height: verticalScale(44),
+      width: verticalScale(44),
+      backgroundColor: colors.cardBackground,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: radius._15,
+      borderCurve: "continuous",
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+    },
+    listItem: {
+      marginBottom: verticalScale(17),
+    },
+    accountOptions: {
+      marginTop: spacingY._35,
+    },
+    flexRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacingX._10,
+    },
+  });

@@ -1,28 +1,63 @@
 import { scale, verticalScale } from "@/utils/styling";
 
-export const colors = {
+export type ThemeMode = "light" | "dark";
+
+const sharedColors = {
   primary: "#a3e635",
   primaryLight: "#0ea5e9",
   primaryDark: "#0369a1",
-  text: "#fff",
-  textLight: "#e5e5e5",
-  textLighter: "#d4d4d4",
-  white: "#fff",
-  black: "#000",
   rose: "#ef4444",
   green: "#16a34a",
-  neutral50: "#fafafa",
-  neutral100: "#f5f5f5",
-  neutral200: "#e5e5e5",
-  neutral300: "#d4d4d4",
-  neutral350: "#CCCCCC",
+  white: "#ffffff",
+  black: "#000000",
+};
+
+export const darkColors = {
+  ...sharedColors,
+  text: "#ffffff",
+  textLight: "#e5e5e5",
+  textLighter: "#d4d4d4",
+  neutral50: "#111111",
+  neutral100: "#181818",
+  neutral200: "#1f1f1f",
+  neutral300: "#262626",
+  neutral350: "#303030",
   neutral400: "#a3a3a3",
   neutral500: "#737373",
   neutral600: "#525252",
   neutral700: "#404040",
   neutral800: "#262626",
   neutral900: "#171717",
+  appBackground: "#0f0f0f",
+  cardBackground: "#1f1f1f",
+  borderColor: "#27272a",
 };
+
+export const lightColors = {
+  ...sharedColors,
+  text: "#0f172a",
+  textLight: "#334155",
+  textLighter: "#475569",
+  neutral50: "#f8fafc",
+  neutral100: "#f1f5f9",
+  neutral200: "#e2e8f0",
+  neutral300: "#cbd5f5",
+  neutral350: "#cbd5f5",
+  neutral400: "#94a3b8",
+  neutral500: "#64748b",
+  neutral600: "#475569",
+  neutral700: "#334155",
+  neutral800: "#ffffff",
+  neutral900: "#f8fafc",
+  appBackground: "#ffffff",
+  cardBackground: "#f1f5f9",
+  borderColor: "#e2e8f0",
+};
+
+export type ThemeColors = typeof darkColors;
+
+export const getThemeColors = (mode: ThemeMode): ThemeColors =>
+  mode === "dark" ? darkColors : lightColors;
 
 export const spacingX = {
   _3: scale(3),

@@ -2,12 +2,13 @@ import BackButton from "@/components/BackButton";
 import Header from "@/components/Header";
 import ModalWrapper from "@/components/ModalWrapper";
 import Typo from "@/components/Typo";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { ThemeColors, radius, spacingX, spacingY } from "@/constants/theme";
 import { LanguageCode } from "@/constants/translations";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import { scale, verticalScale } from "@/utils/styling";
 import * as Icons from "phosphor-react-native";
-import React, { useState } from "react";
+import React from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -26,7 +27,8 @@ const languages: { code: LanguageCode; label: string }[] = [
 const SettingsModal = () => {
   const { language, setLanguage, t } = useLocalization();
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { colors, isDarkMode, setTheme } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   return (
     <ModalWrapper>
@@ -93,7 +95,7 @@ const SettingsModal = () => {
               </View>
               <Switch
                 value={isDarkMode}
-                onValueChange={setIsDarkMode}
+                onValueChange={(value) => setTheme(value ? "dark" : "light")}
                 trackColor={{ false: colors.neutral600, true: colors.primary }}
                 thumbColor={colors.white}
               />
@@ -107,41 +109,44 @@ const SettingsModal = () => {
 
 export default SettingsModal;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: spacingX._20,
-  },
-  content: {
-    gap: spacingY._25,
-    paddingBottom: spacingY._20,
-  },
-  section: {
-    backgroundColor: colors.neutral900,
-    padding: spacingX._20,
-    borderRadius: radius._15,
-    borderCurve: "continuous",
-    gap: spacingY._10,
-  },
-  languageList: {
-    gap: spacingY._10,
-  },
-  languageOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: spacingY._12,
-    paddingHorizontal: spacingX._15,
-    backgroundColor: colors.neutral800,
-    borderRadius: radius._12,
-    borderCurve: "continuous",
-  },
-  languageOptionActive: {
-    backgroundColor: colors.primaryLight,
-  },
-  themeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: scale(12),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: spacingX._20,
+    },
+    content: {
+      gap: spacingY._25,
+      paddingBottom: spacingY._20,
+    },
+    section: {
+      backgroundColor: colors.cardBackground,
+      padding: spacingX._20,
+      borderRadius: radius._15,
+      borderCurve: "continuous",
+      gap: spacingY._10,
+    },
+    languageList: {
+      gap: spacingY._10,
+    },
+    languageOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: spacingY._12,
+      paddingHorizontal: spacingX._15,
+      backgroundColor: colors.appBackground,
+      borderRadius: radius._12,
+      borderCurve: "continuous",
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+    },
+    languageOptionActive: {
+      backgroundColor: colors.primaryLight,
+    },
+    themeRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: scale(12),
+    },
+  });

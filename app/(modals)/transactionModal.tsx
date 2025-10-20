@@ -6,9 +6,10 @@ import Input from "@/components/Input";
 import ModalWrapper from "@/components/ModalWrapper";
 import Typo from "@/components/Typo";
 import { expenseCategories, transactionTypes } from "@/constants/data";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { ThemeColors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
 import { useLocalization } from "@/contexts/localizationContext";
+import { useTheme } from "@/contexts/themeContext";
 import useFetchData from "@/hooks/useFetchData";
 import {
   createOrUpdateTransaction,
@@ -64,7 +65,8 @@ const TransactionModal = () => {
   }, []);
 
   const { t } = useLocalization();
-
+  const { colors, isDarkMode } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const { user, updateUserData } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -308,9 +310,9 @@ const TransactionModal = () => {
             {showDatePicker && (
               <View style={Platform.OS === "ios" && styles.iosDatePicker}>
                 <DateTimePicker
-                  themeVariant="dark"
+                  themeVariant={isDarkMode ? "dark" : "light"}
                   value={transaction.date as Date}
-                  textColor={colors.white}
+                  textColor={colors.text}
                   mode="date"
                   display={Platform.OS === "ios" ? "spinner" : "default"}
                   onChange={onDateChange}
@@ -428,116 +430,99 @@ const TransactionModal = () => {
 
 export default TransactionModal;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: spacingY._20,
-  },
-  form: {
-    gap: spacingY._20,
-    paddingVertical: spacingY._15,
-    paddingBottom: spacingY._40,
-  },
-  footer: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    paddingHorizontal: spacingX._20,
-    gap: scale(12),
-    paddingTop: spacingY._15,
-    borderTopColor: colors.neutral700,
-    marginBottom: spacingY._5,
-    borderWidth: 1,
-  },
-  inputContainer: {
-    gap: spacingY._10,
-  },
-  iosDropdown: {
-    flexDirection: "row",
-    height: verticalScale(54),
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: verticalScale(14),
-    borderWidth: 1,
-    color: colors.white,
-    borderColor: colors.neutral300,
-    borderRadius: radius._17,
-    borderCurve: "continuous",
-    paddingHorizontal: spacingX._15,
-  },
-  androidDropDown: {
-    height: verticalScale(54),
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    fontSize: verticalScale(14),
-    color: colors.white,
-    borderColor: colors.neutral300,
-    borderRadius: radius._17,
-    borderCurve: "continuous",
-    //paddingHorizontal: spacingX._15
-  },
-  flexRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacingX._5,
-  },
-  dateInput: {
-    flexDirection: "row",
-    height: verticalScale(54),
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.neutral300,
-    borderRadius: radius._17,
-    borderCurve: "continuous",
-    paddingHorizontal: spacingX._15,
-  },
-  iosDatePicker: {
-    // backgroundColor: "red"
-  },
-  datePickerButton: {
-    backgroundColor: colors.neutral700,
-    alignSelf: "flex-end",
-    padding: spacingY._7,
-    marginRight: spacingX._7,
-    paddingHorizontal: spacingX._15,
-    borderRadius: radius._10,
-  },
-  dropdownContainer: {
-    height: verticalScale(54),
-    borderWidth: 1,
-    borderColor: colors.neutral300,
-    paddingHorizontal: spacingX._15,
-    borderRadius: radius._15,
-    borderCurve: "continuous",
-  },
-  dropdownItemText: { color: colors.white },
-  dropdownSelectedText: {
-    color: colors.white,
-    fontSize: verticalScale(14),
-  },
-  dropdownListContainer: {
-    backgroundColor: colors.neutral900,
-    borderRadius: radius._15,
-    borderCurve: "continuous",
-    paddingVertical: spacingY._7,
-    top: 5,
-    borderColor: colors.neutral500,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 15,
-    elevation: 5,
-  },
-  dropdownPlaceholder: {
-    color: colors.white,
-  },
-  dropdownItemContainer: {
-    borderRadius: radius._15,
-    marginHorizontal: spacingX._7,
-  },
-  dropdownIcon: {
-    height: verticalScale(30),
-    tintColor: colors.neutral300,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: spacingY._20,
+    },
+    form: {
+      gap: spacingY._20,
+      paddingVertical: spacingY._15,
+      paddingBottom: spacingY._40,
+    },
+    footer: {
+      alignItems: "center",
+      flexDirection: "row",
+      justifyContent: "center",
+      paddingHorizontal: spacingX._20,
+      gap: scale(12),
+      paddingTop: spacingY._15,
+      borderTopColor: colors.borderColor,
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+      marginBottom: spacingY._5,
+      backgroundColor: colors.cardBackground,
+    },
+    inputContainer: {
+      gap: spacingY._10,
+    },
+    flexRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacingX._5,
+    },
+    dateInput: {
+      flexDirection: "row",
+      height: verticalScale(54),
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+      borderRadius: radius._17,
+      borderCurve: "continuous",
+      paddingHorizontal: spacingX._15,
+      backgroundColor: colors.cardBackground,
+    },
+    iosDatePicker: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: radius._15,
+    },
+    datePickerButton: {
+      backgroundColor: colors.cardBackground,
+      alignSelf: "flex-end",
+      padding: spacingY._7,
+      marginRight: spacingX._7,
+      paddingHorizontal: spacingX._15,
+      borderRadius: radius._10,
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+    },
+    dropdownContainer: {
+      height: verticalScale(54),
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+      paddingHorizontal: spacingX._15,
+      borderRadius: radius._15,
+      borderCurve: "continuous",
+      backgroundColor: colors.cardBackground,
+    },
+    dropdownItemText: { color: colors.text },
+    dropdownSelectedText: {
+      color: colors.text,
+      fontSize: verticalScale(14),
+    },
+    dropdownListContainer: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: radius._15,
+      borderCurve: "continuous",
+      paddingVertical: spacingY._7,
+      top: 5,
+      borderColor: colors.borderColor,
+      shadowColor: colors.black,
+      shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.2,
+      shadowRadius: 15,
+      elevation: 5,
+    },
+    dropdownPlaceholder: {
+      color: colors.neutral400,
+    },
+    dropdownItemContainer: {
+      borderRadius: radius._15,
+      marginHorizontal: spacingX._7,
+    },
+    dropdownIcon: {
+      height: verticalScale(30),
+      tintColor: colors.neutral400,
+    },
+  });

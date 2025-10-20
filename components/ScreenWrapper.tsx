@@ -1,4 +1,4 @@
-import { colors } from "@/constants/theme";
+import { useTheme } from "@/contexts/themeContext";
 import { ScreenWrapperProps } from "@/types";
 import React from "react";
 import {
@@ -13,6 +13,7 @@ const { height } = Dimensions.get("window");
 
 const ScreenWrapper = ({ style, children }: ScreenWrapperProps) => {
   let paddingTop = Platform.OS === "ios" ? height * 0.06 : 50;
+  const { colors, isDarkMode } = useTheme();
 
   return (
     <View
@@ -20,12 +21,15 @@ const ScreenWrapper = ({ style, children }: ScreenWrapperProps) => {
         {
           paddingTop,
           flex: 1,
-          backgroundColor: colors.neutral900,
+          backgroundColor: colors.appBackground,
         },
         style,
       ]}
     >
-      <StatusBar barStyle="light-content" backgroundColor={colors.neutral900} />
+      <StatusBar
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
+        backgroundColor={colors.appBackground}
+      />
       {children}
     </View>
   );

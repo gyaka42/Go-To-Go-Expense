@@ -1,4 +1,5 @@
-import { colors, radius } from "@/constants/theme";
+import { ThemeColors, radius } from "@/constants/theme";
+import { useTheme } from "@/contexts/themeContext";
 import { CustomButtonProps } from "@/types";
 import { verticalScale } from "@/utils/styling";
 import React from "react";
@@ -11,9 +12,12 @@ const Button = ({
   loading = false,
   children,
 }: CustomButtonProps) => {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   if (loading) {
     return (
-      <View style={[styles.button, style, { backgroundColor: "transparant" }]}>
+      <View style={[styles.button, style, { backgroundColor: "transparent" }]}>
         {/* Loading Component */}
         <Loading />
       </View>
@@ -28,13 +32,14 @@ const Button = ({
 
 export default Button;
 
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: radius._17,
-    borderCurve: "continuous",
-    justifyContent: "center",
-    alignItems: "center",
-    height: verticalScale(52),
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    button: {
+      backgroundColor: colors.primaryLight,
+      borderRadius: radius._17,
+      borderCurve: "continuous",
+      justifyContent: "center",
+      alignItems: "center",
+      height: verticalScale(52),
+    },
+  });
