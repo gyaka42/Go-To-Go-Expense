@@ -44,7 +44,7 @@ const SettingsModal = () => {
             <Typo size={18} fontWeight={"600"}>
               {t("settings.languageTitle")}
             </Typo>
-            <Typo color={colors.neutral400}>
+            <Typo color={colors.textLight}>
               {t("settings.languageSubtitle")}
             </Typo>
             <View style={styles.languageList}>
@@ -63,7 +63,7 @@ const SettingsModal = () => {
                     <Typo
                       size={16}
                       fontWeight={"500"}
-                      color={isSelected ? colors.black : colors.white}
+                      color={isSelected ? colors.black : colors.text}
                     >
                       {option.label}
                     </Typo>

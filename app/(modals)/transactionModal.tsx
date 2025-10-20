@@ -201,7 +201,7 @@ const TransactionModal = () => {
         >
           {/* Transaction Type */}
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300} size={16}>
+            <Typo color={colors.textLight} size={16}>
               {t("transactionModal.typeLabel")}
             </Typo>
             {/* DROPDOWN MENU */}
@@ -227,7 +227,7 @@ const TransactionModal = () => {
           </View>
           {/* Wallet input */}
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300} size={16}>
+            <Typo color={colors.textLight} size={16}>
               {t("transactionModal.walletLabel")}
             </Typo>
             {/* DROPDOWN MENU */}
@@ -260,7 +260,7 @@ const TransactionModal = () => {
           {/* Expense category */}
           {transaction.type === "expense" && (
             <View style={styles.inputContainer}>
-              <Typo color={colors.neutral300} size={16}>
+              <Typo color={colors.textLight} size={16}>
                 {t("transactionModal.categoryLabel")}
               </Typo>
               {/* DROPDOWN MENU */}
@@ -292,7 +292,7 @@ const TransactionModal = () => {
           {/* Date Picker */}
 
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300} size={16}>
+            <Typo color={colors.textLight} size={16}>
               {t("transactionModal.dateLabel")}
             </Typo>
             {/* Date input */}
@@ -334,7 +334,7 @@ const TransactionModal = () => {
           {/* amount */}
 
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300} size={16}>
+            <Typo color={colors.textLight} size={16}>
               {t("transactionModal.amountLabel")}
             </Typo>
             <Input
@@ -351,7 +351,7 @@ const TransactionModal = () => {
 
           <View style={styles.inputContainer}>
             <View style={styles.flexRow}>
-              <Typo color={colors.neutral300} size={16}>
+              <Typo color={colors.textLight} size={16}>
                 {t("transactionModal.descriptionLabel")}
               </Typo>
               <Typo color={colors.neutral500} size={14}>
@@ -379,7 +379,7 @@ const TransactionModal = () => {
 
           <View style={styles.inputContainer}>
             <View style={styles.flexRow}>
-              <Typo color={colors.neutral300} size={16}>
+              <Typo color={colors.textLight} size={16}>
                 {t("transactionModal.receiptLabel")}
               </Typo>
               <Typo color={colors.neutral500} size={14}>
@@ -478,7 +478,8 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: radius._15,
     },
     datePickerButton: {
-      backgroundColor: colors.cardBackground,
+      backgroundColor: colors.primaryLight,
+      color: colors.text,
       alignSelf: "flex-end",
       padding: spacingY._7,
       marginRight: spacingX._7,
