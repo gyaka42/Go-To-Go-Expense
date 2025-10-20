@@ -101,7 +101,7 @@ const ProfileModal = () => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300}>{t("profileModal.nameLabel")}</Typo>
+            <Typo color={colors.text}>{t("profileModal.nameLabel")}</Typo>
             <Input
               placeholder={t("profileModal.namePlaceholder")}
               value={userData.name}

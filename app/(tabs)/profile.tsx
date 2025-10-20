@@ -98,7 +98,7 @@ const Profile = () => {
         {/* user information */}
         <View style={styles.userInfo}>
           {/* User Avatar */}
-          <View>
+          <View style={styles.avatarContainer}>
             {/* User image */}
             <Image
               source={getProfileImage(user?.image)}
@@ -109,7 +109,7 @@ const Profile = () => {
           </View>
           {/* Name and email */}
           <View style={styles.nameContainer}>
-            <Typo size={24} fontWeight={"600"} color={colors.neutral100}>
+            <Typo size={24} fontWeight={"600"} color={colors.text}>
               {user?.name}
             </Typo>
             <Typo size={15} color={colors.neutral400}>
