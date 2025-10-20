@@ -52,7 +52,7 @@ const HomeCard = () => {
         <View>
           {/* Totaal Balans */}
           <View style={styles.totalBalanceRow}>
-            <Typo color={colors.neutral800} size={17} fontWeight={"500"}>
+            <Typo color={colors.neutral500} size={17} fontWeight={"500"}>
               {t("homeCard.totalBalance")}
             </Typo>
             <Icons.DotsThreeOutlineIcon

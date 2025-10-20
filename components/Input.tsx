@@ -15,7 +15,7 @@ const Input = (props: InputProps) => {
       {props.icon && props.icon}
       <TextInput
         style={[styles.input, props.inputStyle]}
-        placeholderTextColor={colors.neutral400}
+        placeholderTextColor={colors.text}
         ref={props.inputRef && props.inputRef}
         {...props}
       />
@@ -38,7 +38,7 @@ const createStyles = (colors: ThemeColors) =>
       borderCurve: "continuous",
       paddingHorizontal: spacingX._15,
       gap: spacingX._10,
-      backgroundColor: colors.cardBackground,
+      backgroundColor: colors.neutral100,
     },
     input: {
       flex: 1,

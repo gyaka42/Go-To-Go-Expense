@@ -11,24 +11,31 @@ import {
 
 const { height } = Dimensions.get("window");
 
-const ScreenWrapper = ({ style, children }: ScreenWrapperProps) => {
+const ScreenWrapper = ({
+  style,
+  children,
+  statusBarBackgroundColor,
+}: ScreenWrapperProps) => {
   let paddingTop = Platform.OS === "ios" ? height * 0.06 : 50;
   const { colors, isDarkMode } = useTheme();
-
+  const flattenedStyle = StyleSheet.flatten(style);
+  const wrapperBackground =
+    flattenedStyle?.backgroundColor ?? colors.appBackground;
+  const statusBarColor = statusBarBackgroundColor ?? wrapperBackground;
   return (
     <View
       style={[
         {
           paddingTop,
           flex: 1,
-          backgroundColor: colors.appBackground,
+          backgroundColor: wrapperBackground,
         },
         style,
       ]}
     >
       <StatusBar
         barStyle={isDarkMode ? "light-content" : "dark-content"}
-        backgroundColor={colors.appBackground}
+        backgroundColor={statusBarColor}
       />
       {children}
     </View>

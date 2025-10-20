@@ -41,7 +41,7 @@ const Home = () => {
         {/* Header */}
         <View style={styles.header}>
           <View style={{ gap: 4 }}>
-            <Typo size={16} color={colors.neutral400}>
+            <Typo size={16} color={colors.text}>
               {t("home.greeting")}
             </Typo>
             <Typo size={20} fontWeight={"500"}>

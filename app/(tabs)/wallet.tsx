@@ -41,7 +41,10 @@ const Wallet = () => {
     }, 0);
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper
+      style={{ backgroundColor: colors.cardBackground }}
+      statusBarBackgroundColor={colors.cardBackground}
+    >
       <View style={styles.container}>
         {/* Balance view */}
         <View style={styles.balanceView}>
