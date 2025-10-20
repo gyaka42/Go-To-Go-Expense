@@ -479,7 +479,6 @@ const createStyles = (colors: ThemeColors) =>
     },
     datePickerButton: {
       backgroundColor: colors.primaryLight,
-      color: colors.text,
       alignSelf: "flex-end",
       padding: spacingY._7,
       marginRight: spacingX._7,

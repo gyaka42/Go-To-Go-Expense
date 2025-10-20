@@ -125,6 +125,13 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: radius._15,
       borderCurve: "continuous",
       gap: spacingY._10,
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+      shadowColor: colors.black,
+      shadowOffset: { width: 0, height: verticalScale(4) },
+      shadowOpacity: 0.1,
+      shadowRadius: scale(12),
+      elevation: 3,
     },
     languageList: {
       gap: spacingY._10,
