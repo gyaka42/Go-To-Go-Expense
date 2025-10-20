@@ -50,7 +50,7 @@ export const lightColors = {
   neutral800: "#ffffff",
   neutral900: "#f8fafc",
   appBackground: "#ffffff",
-  cardBackground: "#f1f5f9",
+  cardBackground: "#e8f1faff",
   borderColor: "#e2e8f0",
 };
 

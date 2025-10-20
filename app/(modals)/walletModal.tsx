@@ -113,7 +113,7 @@ const WalletModal = () => {
         {/* Form */}
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300}>{t("wallet.modal.nameLabel")}</Typo>
+            <Typo color={colors.text}>{t("wallet.modal.nameLabel")}</Typo>
             <Input
               placeholder={t("wallet.modal.namePlaceholder")}
               value={wallet.name}
@@ -121,7 +121,7 @@ const WalletModal = () => {
             />
           </View>
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral300}>{t("wallet.modal.iconLabel")}</Typo>
+            <Typo color={colors.text}>{t("wallet.modal.iconLabel")}</Typo>
             {/* image input */}
             <ImageUpload
               file={wallet.image}

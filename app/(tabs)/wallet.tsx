@@ -49,7 +49,7 @@ const Wallet = () => {
             <Typo size={45} fontWeight={"500"}>
               € {getTotalBalance()?.toFixed(2)},-
             </Typo>
-            <Typo size={16} color={colors.neutral300}>
+            <Typo size={16} color={colors.text}>
               {t("wallet.totalAmount")}
             </Typo>
           </View>
@@ -114,6 +114,7 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: "center",
       borderBottomLeftRadius: radius._30,
       borderBottomRightRadius: radius._30,
+      marginTop: spacingY._15,
     },
     flexRow: {
       flexDirection: "row",
