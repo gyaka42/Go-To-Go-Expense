@@ -8,7 +8,7 @@ import { useLocalization } from "@/contexts/localizationContext";
 import { useTheme } from "@/contexts/themeContext";
 import { getProfileImage } from "@/services/imageService";
 import { accountOptionType } from "@/types";
-import { verticalScale } from "@/utils/styling";
+import { scale, verticalScale } from "@/utils/styling";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
@@ -96,7 +96,7 @@ const Profile = () => {
         />
 
         {/* user information */}
-        <View style={styles.userInfo}>
+        <View style={[styles.sectionCard, styles.userInfo]}>
           {/* User Avatar */}
           <View style={styles.avatarContainer}>
             {/* User image */}
@@ -119,7 +119,7 @@ const Profile = () => {
         </View>
 
         {/* account opties */}
-        <View style={styles.accountOptions}>
+        <View style={[styles.sectionCard, styles.accountOptions]}>
           {accountOptions.map((item, index) => {
             return (
               <Animated.View
@@ -127,7 +127,10 @@ const Profile = () => {
                 entering={FadeInDown.delay(index * 50)
                   .springify()
                   .damping(36)}
-                style={styles.listItem}
+                style={[
+                  styles.listItem,
+                  index === accountOptions.length - 1 && styles.lastListItem,
+                ]}
               >
                 <TouchableOpacity
                   style={styles.flexRow}
@@ -206,6 +209,9 @@ const createStyles = (colors: ThemeColors) =>
     listItem: {
       marginBottom: verticalScale(17),
     },
+    lastListItem: {
+      marginBottom: 0,
+    },
     accountOptions: {
       marginTop: spacingY._35,
     },
@@ -213,5 +219,18 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "center",
       gap: spacingX._10,
+    },
+    sectionCard: {
+      backgroundColor: colors.cardBackground,
+      padding: spacingX._20,
+      borderRadius: radius._15,
+      borderCurve: "continuous",
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+      shadowColor: colors.black,
+      shadowOffset: { width: 0, height: verticalScale(4) },
+      shadowOpacity: 0.1,
+      shadowRadius: scale(12),
+      elevation: 3,
     },
   });
