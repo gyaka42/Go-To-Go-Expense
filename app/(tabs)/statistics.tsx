@@ -13,7 +13,8 @@ import {
 } from "@/services/transactionService";
 import { scale, verticalScale } from "@/utils/styling";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 
@@ -30,17 +31,25 @@ const Statistics = () => {
     [colors, isDarkMode]
   );
 
-  useEffect(() => {
-    if (activeIndex === 0) {
-      getWeeklyStats();
-    }
-    if (activeIndex === 1) {
-      getMonthlyStats();
-    }
-    if (activeIndex === 2) {
-      getYearlyStats();
-    }
-  }, [activeIndex]);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!user?.uid) {
+        setChartData([]);
+        setTransactions([]);
+        return;
+      }
+
+      if (activeIndex === 0) {
+        getWeeklyStats();
+      }
+      if (activeIndex === 1) {
+        getMonthlyStats();
+      }
+      if (activeIndex === 2) {
+        getYearlyStats();
+      }
+    }, [activeIndex, user?.uid])
+  );
 
   const getWeeklyStats = async () => {
     setChartLoading(true);
