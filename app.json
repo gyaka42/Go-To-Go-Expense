@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "expense-app",
+    "name": "Go-To-Go Expense",
     "slug": "expense-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +9,14 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gyaka42.gotogoexpense",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "We gebruiken je camera om bonnen of afbeeldingen te uploaden.",
+        "NSPhotoLibraryUsageDescription": "We hebben toegang tot je fotobibliotheek nodig om afbeeldingen te kiezen voor je profiel en wallets.",
+        "NSPhotoLibraryAddUsageDescription": "We hebben toestemming nodig om afbeeldingen op te slaan die binnen de app worden gemaakt of bewerkt."
+      }
     },
     "android": {
       "adaptiveIcon": {

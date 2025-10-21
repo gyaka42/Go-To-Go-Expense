@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -75,6 +76,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (error: unknown) {
+      let msg = error instanceof Error ? error.message : String(error);
+      console.log("error message: ", msg);
+      if (msg.includes("(auth/invalid-email)")) msg = "Onjuist e-mailadres.";
+      if (msg.includes("(auth/user-not-found)"))
+        msg = "Geen account gevonden voor dit e-mailadres.";
+      return { success: false, msg };
+    }
+  };
+
   const updateUserData = async (uid: string) => {
     try {
       const docRef = doc(firestore, "users", uid);
@@ -100,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser,
     login,
     register,
+    resetPassword,
     updateUserData,
   };
 

@@ -13,50 +13,64 @@ import * as Icons from "phosphor-react-native";
 import React, { useRef, useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 
-const Login = () => {
+const ForgotPassword = () => {
   const emailRef = useRef("");
-  const passwordRef = useRef("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login: loginUser } = useAuth();
+  const { resetPassword } = useAuth();
   const { t } = useLocalization();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   const handleSubmit = async () => {
-    if (!emailRef.current || !passwordRef.current) {
-      Alert.alert(t("auth.login.title"), t("auth.common.fillFields"));
+    if (!emailRef.current) {
+      Alert.alert(t("auth.forgotPassword.title"), t("auth.common.fillFields"));
       return;
     }
+
     setIsLoading(true);
-    const res = await loginUser(emailRef.current, passwordRef.current);
+    const res = await resetPassword(emailRef.current);
     setIsLoading(false);
-    if (!res.success) {
-      Alert.alert(t("auth.login.title"), res.msg);
+
+    if (res.success) {
+      Alert.alert(
+        t("auth.forgotPassword.title"),
+        t("auth.forgotPassword.successMessage"),
+        [
+          {
+            text: t("common.ok"),
+            onPress: () => router.replace("/(auth)/login"),
+          },
+        ]
+      );
+      return;
     }
+
+    Alert.alert(t("auth.forgotPassword.title"), res.msg);
   };
 
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        {/* Back Button Here */}
         <BackButton iconSize={28} />
 
         <View style={{ gap: 5, marginTop: spacingY._20 }}>
           <Typo size={30} fontWeight={"800"}>
-            {t("auth.login.greeting")}
+            {t("auth.forgotPassword.headingLine1")}
           </Typo>
           <Typo size={30} fontWeight={"800"}>
-            Welkom terug
+            {t("auth.forgotPassword.headingLine2")}
           </Typo>
         </View>
-        {/* hier komt Form */}
+
         <View style={styles.form}>
           <Typo size={16} color={colors.textLighter}>
-            Log in en volg direct al je uitgaven
+            {t("auth.forgotPassword.subtitle")}
           </Typo>
-          {/* Hier komt Input */}
           <Input
             placeholder={t("auth.common.emailPlaceholder")}
+            autoCapitalize="none"
+            keyboardType="email-address"
             onChangeText={(value) => (emailRef.current = value)}
             icon={
               <Icons.AtIcon
@@ -65,40 +79,19 @@ const Login = () => {
               />
             }
           />
-          <Input
-            placeholder={t("auth.common.passwordPlaceholder")}
-            secureTextEntry
-            onChangeText={(value) => (passwordRef.current = value)}
-            icon={
-              <Icons.LockIcon
-                size={verticalScale(26)}
-                color={colors.neutral400}
-              />
-            }
-          />
-          <Pressable
-            style={{ alignSelf: "flex-end" }}
-            onPress={() => router.navigate("/(auth)/forgot-password")}
-          >
-            <Typo size={14} style={styles.forgotPassword}>
-              {t("auth.login.forgotPassword")}
-            </Typo>
-          </Pressable>
 
           <Button loading={isLoading} onPress={handleSubmit}>
             <Typo fontWeight={"700"} color={colors.black} size={21}>
-              {t("auth.login.submit")}
+              {t("auth.forgotPassword.submit")}
             </Typo>
           </Button>
         </View>
 
-        {/* Footer komt hier */}
-
         <View style={styles.footer}>
-          <Typo size={15}>{t("auth.login.noAccountQuestion")}</Typo>
-          <Pressable onPress={() => router.navigate("/(auth)/register")}>
+          <Typo size={15}>{t("auth.forgotPassword.rememberPassword")}</Typo>
+          <Pressable onPress={() => router.replace("/(auth)/login")}>
             <Typo size={15} fontWeight={"700"} color={colors.primaryLight}>
-              {t("auth.login.goToRegister")}
+              {t("auth.forgotPassword.backToLogin")}
             </Typo>
           </Pressable>
         </View>
@@ -107,7 +100,7 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
@@ -119,20 +112,10 @@ const createStyles = (colors: ThemeColors) =>
     form: {
       gap: spacingY._20,
     },
-    forgotPassword: {
-      textAlign: "right",
-      fontWeight: "500",
-      color: colors.primaryLight,
-    },
     footer: {
-      flexDirection: "row",
+      flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
       gap: 5,
-    },
-    footerText: {
-      color: colors.text,
-      textAlign: "center",
-      fontSize: verticalScale(15),
     },
   });
