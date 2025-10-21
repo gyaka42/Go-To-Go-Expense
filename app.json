@@ -15,7 +15,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "We gebruiken je camera om bonnen of afbeeldingen te uploaden.",
         "NSPhotoLibraryUsageDescription": "We hebben toegang tot je fotobibliotheek nodig om afbeeldingen te kiezen voor je profiel en wallets.",
-        "NSPhotoLibraryAddUsageDescription": "We hebben toestemming nodig om afbeeldingen op te slaan die binnen de app worden gemaakt of bewerkt."
+        "NSPhotoLibraryAddUsageDescription": "We hebben toestemming nodig om afbeeldingen op te slaan die binnen de app worden gemaakt of bewerkt.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -52,6 +53,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cbcf0f8a-631c-432f-b071-693ed78f57b3"
+      }
     }
   }
 }
