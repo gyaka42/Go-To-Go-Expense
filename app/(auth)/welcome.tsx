@@ -7,13 +7,23 @@ import { useTheme } from "@/contexts/themeContext";
 import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
 const Welcome = () => {
   const { t } = useLocalization();
   const { colors } = useTheme();
-  const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const { height } = useWindowDimensions();
+  const isCompactHeight = height <= 812;
+  const styles = React.useMemo(
+    () => createStyles(colors, isCompactHeight),
+    [colors, isCompactHeight]
+  );
   const router = useRouter();
   return (
     <ScreenWrapper>
@@ -100,7 +110,7 @@ const Welcome = () => {
 
 export default Welcome;
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, isCompactHeight: boolean) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -112,14 +122,14 @@ const createStyles = (colors: ThemeColors) =>
       height: verticalScale(300),
       alignSelf: "center",
       position: "absolute",
-      marginTop: verticalScale(100),
+      marginTop: isCompactHeight ? verticalScale(90) : verticalScale(100),
     },
     titleContainer: {
       justifyContent: "center",
       alignItems: "center",
       marginTop: verticalScale(24),
       gap: verticalScale(4),
-      paddingTop: 320,
+      paddingTop: isCompactHeight ? verticalScale(280) : verticalScale(300),
       position: "relative",
     },
     titleText: {
