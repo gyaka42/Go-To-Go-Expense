@@ -32,6 +32,22 @@ const Welcome = () => {
             style={styles.welcomeImage}
             resizeMode="contain"
           />
+          <View style={styles.titleContainer}>
+            <Typo
+              size={40}
+              fontWeight={"600"}
+              style={{ ...styles.titleText, ...styles.titlePrimary }}
+            >
+              Go-To-Go
+            </Typo>
+            <Typo
+              size={30}
+              fontWeight={"600"}
+              style={{ ...styles.titleText, ...styles.titleSecondary }}
+            >
+              Expense
+            </Typo>
+          </View>
         </View>
         {/* Footer */}
 
@@ -95,8 +111,27 @@ const createStyles = (colors: ThemeColors) =>
       width: "100%",
       height: verticalScale(300),
       alignSelf: "center",
-
+      position: "absolute",
       marginTop: verticalScale(100),
+    },
+    titleContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: verticalScale(24),
+      gap: verticalScale(4),
+      paddingTop: 320,
+      position: "relative",
+    },
+    titleText: {
+      letterSpacing: 0.5,
+      textAlign: "center",
+      justifyContent: "center",
+    },
+    titlePrimary: {
+      lineHeight: Math.round(verticalScale(50) * 1.1),
+    },
+    titleSecondary: {
+      lineHeight: Math.round(verticalScale(40) * 1.1),
     },
     loginButton: {
       alignSelf: "flex-end",
