@@ -1,7 +1,6 @@
 import { spacingY } from "@/constants/theme";
 import { useTheme } from "@/contexts/themeContext";
 import { ModalWrapperProps } from "@/types";
-import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 
 const isIos = Platform.OS === "ios";

@@ -21,15 +21,24 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { orderBy, where } from "firebase/firestore";
 import * as Icons from "phosphor-react-native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Alert,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
+  UIManager,
   View,
+  findNodeHandle,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
@@ -62,14 +71,17 @@ const TransactionModal = () => {
         image: oldTransaction?.image ?? null,
       });
     }
-  }, []);
+  }, [oldTransaction]);
 
   const { t } = useLocalization();
   const { colors, isDarkMode } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const { user, updateUserData } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const amountInputRef = useRef<TextInput>(null);
+  const descriptionInputRef = useRef<TextInput>(null);
   const [transaction, setTransaction] = useState<TransactionType>({
     type: "expense",
     amount: 0,
@@ -182,6 +194,31 @@ const TransactionModal = () => {
     );
   };
 
+  const scrollToInput = useCallback(
+    (inputRef: React.RefObject<TextInput | null>) => {
+      const scrollView = scrollViewRef.current;
+      const input = inputRef.current;
+      if (!scrollView || !input) return;
+
+      requestAnimationFrame(() => {
+        const scrollViewHandle = findNodeHandle(scrollView);
+        const inputHandle = findNodeHandle(input);
+        if (!scrollViewHandle || !inputHandle) return;
+
+        UIManager.measureLayout(
+          inputHandle,
+          scrollViewHandle,
+          () => undefined,
+          (_x, y) => {
+            const targetOffset = Math.max(0, y - spacingY._25);
+            scrollView.scrollTo({ y: targetOffset, animated: true });
+          }
+        );
+      });
+    },
+    []
+  );
+
   return (
     <ModalWrapper>
       <View style={styles.container}>
@@ -196,8 +233,12 @@ const TransactionModal = () => {
         />
         {/* Form */}
         <ScrollView
+          ref={scrollViewRef}
           contentContainerStyle={styles.form}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
+          keyboardDismissMode="interactive"
         >
           {/* Transaction Type */}
           <View style={styles.inputContainer}>
@@ -340,6 +381,8 @@ const TransactionModal = () => {
             <Input
               keyboardType="numeric"
               value={transaction.amount?.toString()}
+              inputRef={amountInputRef as React.RefObject<TextInput>}
+              onFocus={() => scrollToInput(amountInputRef)}
               onChangeText={(value) =>
                 setTransaction({
                   ...transaction,
@@ -368,6 +411,8 @@ const TransactionModal = () => {
                 alignItems: "flex-start",
                 paddingVertical: 15,
               }}
+              inputRef={descriptionInputRef as React.RefObject<TextInput>}
+              onFocus={() => scrollToInput(descriptionInputRef)}
               onChangeText={(value) =>
                 setTransaction({
                   ...transaction,
@@ -439,7 +484,7 @@ const createStyles = (colors: ThemeColors) =>
     form: {
       gap: spacingY._20,
       paddingVertical: spacingY._15,
-      paddingBottom: spacingY._40,
+      paddingBottom: spacingY._60,
     },
     footer: {
       alignItems: "center",
