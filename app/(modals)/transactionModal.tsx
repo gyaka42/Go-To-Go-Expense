@@ -58,19 +58,24 @@ const TransactionModal = () => {
   };
 
   const oldTransaction: paramType = useLocalSearchParams();
+  const lastTransactionIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (oldTransaction?.id) {
-      setTransaction({
-        type: oldTransaction?.type,
-        amount: Number(oldTransaction.amount),
-        description: oldTransaction.description || "",
-        category: oldTransaction.category || "",
-        date: new Date(oldTransaction.date),
-        walletId: oldTransaction.walletId,
-        image: oldTransaction?.image ?? null,
-      });
-    }
+    if (!oldTransaction?.id) return;
+
+    const currentId = String(oldTransaction.id);
+    if (lastTransactionIdRef.current === currentId) return;
+    lastTransactionIdRef.current = currentId;
+
+    setTransaction({
+      type: oldTransaction?.type,
+      amount: Number(oldTransaction.amount),
+      description: oldTransaction.description || "",
+      category: oldTransaction.category || "",
+      date: new Date(oldTransaction.date),
+      walletId: oldTransaction.walletId,
+      image: oldTransaction?.image ?? null,
+    });
   }, [oldTransaction]);
 
   const { t } = useLocalization();
