@@ -26,10 +26,53 @@ const Statistics = () => {
   const [transactions, setTransactions] = useState([]);
   const { t } = useLocalization();
   const { colors, isDarkMode } = useTheme();
+  const yAxisLabelWidth = React.useMemo(
+    () => ([1, 2].includes(activeIndex) ? scale(60) : scale(48)),
+    [activeIndex]
+  );
   const styles = React.useMemo(
     () => createStyles(colors, isDarkMode),
     [colors, isDarkMode]
   );
+
+  const getWeeklyStats = React.useCallback(async () => {
+    setChartLoading(true);
+    let res = await fetchWeeklyStats(user?.uid as string);
+    setChartLoading(false);
+
+    if (res.success) {
+      setChartData(res?.data?.stats);
+      setTransactions(res?.data?.transactions);
+    } else {
+      Alert.alert(t("common.error"), res.msg);
+    }
+  }, [t, user?.uid]);
+
+  const getMonthlyStats = React.useCallback(async () => {
+    setChartLoading(true);
+    let res = await fetchMonthlyStats(user?.uid as string);
+    setChartLoading(false);
+
+    if (res.success) {
+      setChartData(res?.data?.stats);
+      setTransactions(res?.data?.transactions);
+    } else {
+      Alert.alert(t("common.error"), res.msg);
+    }
+  }, [t, user?.uid]);
+
+  const getYearlyStats = React.useCallback(async () => {
+    setChartLoading(true);
+    let res = await fetchYearlyStats(user?.uid as string);
+    setChartLoading(false);
+
+    if (res.success) {
+      setChartData(res?.data?.stats);
+      setTransactions(res?.data?.transactions);
+    } else {
+      Alert.alert(t("common.error"), res.msg);
+    }
+  }, [t, user?.uid]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -48,47 +91,14 @@ const Statistics = () => {
       if (activeIndex === 2) {
         getYearlyStats();
       }
-    }, [activeIndex, user?.uid])
+    }, [
+      activeIndex,
+      getMonthlyStats,
+      getWeeklyStats,
+      getYearlyStats,
+      user?.uid,
+    ])
   );
-
-  const getWeeklyStats = async () => {
-    setChartLoading(true);
-    let res = await fetchWeeklyStats(user?.uid as string);
-    setChartLoading(false);
-
-    if (res.success) {
-      setChartData(res?.data?.stats);
-      setTransactions(res?.data?.transactions);
-    } else {
-      Alert.alert(t("common.error"), res.msg);
-    }
-  };
-
-  const getMonthlyStats = async () => {
-    setChartLoading(true);
-    let res = await fetchMonthlyStats(user?.uid as string);
-    setChartLoading(false);
-
-    if (res.success) {
-      setChartData(res?.data?.stats);
-      setTransactions(res?.data?.transactions);
-    } else {
-      Alert.alert(t("common.error"), res.msg);
-    }
-  };
-
-  const getYearlyStats = async () => {
-    setChartLoading(true);
-    let res = await fetchYearlyStats(user?.uid as string);
-    setChartLoading(false);
-
-    if (res.success) {
-      setChartData(res?.data?.stats);
-      setTransactions(res?.data?.transactions);
-    } else {
-      Alert.alert(t("common.error"), res.msg);
-    }
-  };
 
   return (
     <ScreenWrapper>
@@ -138,9 +148,7 @@ const Statistics = () => {
                 yAxisLabelPrefix="€"
                 yAxisThickness={0}
                 xAxisThickness={0}
-                yAxisLabelWidth={
-                  [1, 2].includes(activeIndex) ? scale(38) : scale(35)
-                }
+                yAxisLabelWidth={yAxisLabelWidth}
                 yAxisTextStyle={{ color: colors.neutral400 }}
                 xAxisLabelTextStyle={{
                   color: colors.neutral400,
@@ -185,7 +193,12 @@ const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
     chartContainer: {
       position: "relative",
       justifyContent: "center",
-      alignItems: "center",
+      alignItems: "stretch",
+      width: "100%",
+      paddingHorizontal: spacingX._12,
+    },
+    chart: {
+      alignSelf: "stretch",
     },
     chartLoadingContainer: {
       position: "absolute",
