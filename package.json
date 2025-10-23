@@ -1,7 +1,7 @@
 {
   "name": "expense-app",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -29,7 +29,7 @@
     "expo-image-picker": "~17.0.8",
     "expo-linear-gradient": "^15.0.7",
     "expo-linking": "~8.0.8",
-    "expo-router": "~6.0.12",
+    "expo-router": "^6.0.6",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",
     "expo-symbols": "~1.0.7",
