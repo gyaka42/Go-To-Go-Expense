@@ -6,9 +6,10 @@ index 4205de5..7f05d75 100644
  
    s.dependency 'ExpoModulesCore'
  
+-  add_dependency(s, "RNScreens")
 +  if s && s.respond_to?(:dependency)
-   add_dependency(s, "RNScreens")
-+end
++    s.dependency "RNScreens"
++  end
  
    # Swift/Objective-C compatibility
    s.pod_target_xcconfig = {
