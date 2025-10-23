@@ -57,7 +57,7 @@ const ProfileModal = () => {
   };
 
   const onSubmit = async () => {
-    let { name, image } = userData;
+    let { name } = userData;
     if (!name.trim()) {
       Alert.alert(t("profileModal.alertTitle"), t("auth.common.fillFields"));
       return;

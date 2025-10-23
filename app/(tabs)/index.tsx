@@ -29,11 +29,8 @@ const Home = () => {
     limit(30),
   ];
 
-  const {
-    data: recentTransactions,
-    error,
-    loading: loadingTransactions,
-  } = useFetchData<TransactionType>("transactions", constraints);
+  const { data: recentTransactions, loading: loadingTransactions } =
+    useFetchData<TransactionType>("transactions", constraints);
 
   return (
     <ScreenWrapper>
@@ -120,7 +117,7 @@ const createStyles = (colors: ThemeColors) =>
       width: verticalScale(50),
       borderRadius: 100,
       position: "absolute",
-      bottom: verticalScale(30),
+      bottom: verticalScale(80),
       right: verticalScale(30),
     },
     scrollViewStyle: {

@@ -1,6 +1,5 @@
 import { useTheme } from "@/contexts/themeContext";
 import { ScreenWrapperProps } from "@/types";
-import React from "react";
 import {
   Dimensions,
   Platform,
@@ -43,5 +42,3 @@ const ScreenWrapper = ({
 };
 
 export default ScreenWrapper;
-
-const styles = StyleSheet.create({});

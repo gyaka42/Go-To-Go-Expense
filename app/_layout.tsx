@@ -2,7 +2,6 @@ import { AuthProvider } from "@/contexts/authContext";
 import { LocalizationProvider } from "@/contexts/localizationContext";
 import { ThemeProvider } from "@/contexts/themeContext";
 import { Stack } from "expo-router";
-import React from "react";
 
 const StackLayout = () => {
   return (

@@ -9,13 +9,11 @@ import { useLocalization } from "@/contexts/localizationContext";
 import { useTheme } from "@/contexts/themeContext";
 import useFetchData from "@/hooks/useFetchData";
 import { TransactionType } from "@/types";
-import { useRouter } from "expo-router";
 import { orderBy, where } from "firebase/firestore";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 const SearchModal = () => {
-  const router = useRouter();
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const { t } = useLocalization();
@@ -23,11 +21,8 @@ const SearchModal = () => {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const constraints = [where("uid", "==", user?.uid), orderBy("date", "desc")];
 
-  const {
-    data: allTransactions,
-    error,
-    loading: transactionsLoading,
-  } = useFetchData<TransactionType>("transactions", constraints);
+  const { data: allTransactions, loading: transactionsLoading } =
+    useFetchData<TransactionType>("transactions", constraints);
 
   const filteredTransactions = allTransactions.filter((item) => {
     if (search.length > 1) {

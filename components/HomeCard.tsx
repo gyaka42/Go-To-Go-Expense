@@ -21,11 +21,11 @@ const HomeCard = () => {
     return [where("uid", "==", user.uid), orderBy("created", "desc")];
   }, [user?.uid]);
 
-  const {
-    data: wallets,
-    loading,
-    error,
-  } = useFetchData<WalletType>("wallets", constraints, [user?.uid]);
+  const { data: wallets, loading } = useFetchData<WalletType>(
+    "wallets",
+    constraints,
+    [user?.uid]
+  );
 
   const getTotals = () => {
     if (!wallets || wallets.length === 0) {
