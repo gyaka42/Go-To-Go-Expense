@@ -1,0 +1,14 @@
+diff --git a/node_modules/expo-router/ios/ExpoHead.podspec b/node_modules/expo-router/ios/ExpoHead.podspec
+index 4205de5..4a1faeb 100644
+--- a/node_modules/expo-router/ios/ExpoHead.podspec
++++ b/node_modules/expo-router/ios/ExpoHead.podspec
+@@ -27,7 +27,9 @@ Pod::Spec.new do |s|
+ 
+   s.dependency 'ExpoModulesCore'
+ 
++  if defined?(s)
+   add_dependency(s, "RNScreens")
++  end
+ 
+   # Swift/Objective-C compatibility
+   s.pod_target_xcconfig = {
