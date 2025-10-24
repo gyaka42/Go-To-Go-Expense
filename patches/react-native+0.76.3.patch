@@ -1,0 +1,19 @@
+diff --git a/node_modules/react-native/ReactAppDependencyProvider.podspec b/node_modules/react-native/ReactAppDependencyProvider.podspec
+new file mode 100644
+index 0000000..27d4100
+--- /dev/null
++++ b/node_modules/react-native/ReactAppDependencyProvider.podspec
+@@ -0,0 +1,13 @@
++Pod::Spec.new do |s|
++  s.name         = "ReactAppDependencyProvider"
++  s.version      = "0.1.0"
++  s.summary      = "Compatibility stub for Expo SDK 54 + RN 0.76.x"
++  s.description  = "Provides a no-op pod so Expo’s Podfile can resolve dependencies."
++  s.homepage     = "https://reactnative.dev"
++  s.license      = { :type => "MIT" }
++  s.authors      = "Meta Platforms, Inc."
++  s.platforms    = { :ios => "13.4" }
++  s.source       = { :path => "." }
++  s.source_files = []   # no sources; just a stub
++  s.dependency "React-Core"
++end
