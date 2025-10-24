@@ -1,7 +1,7 @@
 const { withPodfile } = require("@expo/config-plugins");
 
-const POD_SNIPPET =
-  "  pod 'ReactAppDependencyProvider', :podspec => File.join(config[:reactNativePath], 'ReactAppDependencyProvider.podspec.json')";
+const POD_LINE =
+  "pod 'ReactAppDependencyProvider', :podspec => File.join(config[:reactNativePath], 'ReactAppDependencyProvider.podspec.json')";
 
 module.exports = function withReactAppDependencyProviderPodspec(config) {
   return withPodfile(config, (config) => {
@@ -11,14 +11,21 @@ module.exports = function withReactAppDependencyProviderPodspec(config) {
       return config;
     }
 
-    const pattern = /(\s*config\s*=\s*use_native_modules!\s*\n)/;
-    if (!pattern.test(podfile)) {
+    const lines = podfile.split("\n");
+    const targetIndex = lines.findIndex((line) =>
+      line.includes("config = use_native_modules!")
+    );
+
+    if (targetIndex === -1) {
       throw new Error(
         "Unable to locate `config = use_native_modules!` in the generated Podfile."
       );
     }
 
-    config.modResults.contents = podfile.replace(pattern, `$1${POD_SNIPPET}\n`);
+    const indent = lines[targetIndex].match(/^\s*/)?.[0] ?? "";
+    lines.splice(targetIndex + 1, 0, `${indent}${POD_LINE}`);
+
+    config.modResults.contents = lines.join("\n");
     return config;
   });
 };
