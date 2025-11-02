@@ -52,7 +52,7 @@ const HomeCard = () => {
         <View>
           {/* Totaal Balans */}
           <View style={styles.totalBalanceRow}>
-            <Typo color={colors.neutral500} size={17} fontWeight={"500"}>
+            <Typo color="white" size={17} fontWeight={"600"}>
               {t("homeCard.totalBalance")}
             </Typo>
             <Icons.DotsThreeOutlineIcon
@@ -78,7 +78,7 @@ const HomeCard = () => {
                   weight="bold"
                 />
               </View>
-              <Typo size={16} color={colors.neutral700} fontWeight={"500"}>
+              <Typo size={16} color="white" fontWeight={"500"}>
                 {t("homeCard.income")}
               </Typo>
             </View>
@@ -98,7 +98,7 @@ const HomeCard = () => {
                   weight="bold"
                 />
               </View>
-              <Typo size={16} color={colors.neutral700} fontWeight={"500"}>
+              <Typo size={16} color="white" fontWeight={"500"}>
                 {t("homeCard.expenses")}
               </Typo>
             </View>

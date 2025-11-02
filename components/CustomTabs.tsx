@@ -22,7 +22,9 @@ export default function CustomTabs({
   const isIOS = Platform.OS === "ios";
   const bottomInset = isIOS ? insets.bottom : 0;
   const iosBottomOffset =
-    bottomInset > 0 ? Math.max(0, bottomInset - spacingY._15) : spacingY._5;
+    bottomInset > 0
+      ? Math.max(0, bottomInset - spacingY._15 + 10)
+      : spacingY._5 + 10;
   const iosContentPadding = bottomInset > 0 ? spacingY._5 : spacingY._7;
   const tabbarIcons: any = React.useMemo(
     () => ({

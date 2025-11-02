@@ -10,6 +10,7 @@ import { useTheme } from "@/contexts/themeContext";
 import useFetchData from "@/hooks/useFetchData";
 import { TransactionType } from "@/types";
 import { verticalScale } from "@/utils/styling";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useRouter } from "expo-router";
 import { limit, orderBy, where } from "firebase/firestore";
 import * as Icons from "phosphor-react-native";
@@ -21,7 +22,11 @@ const Home = () => {
   const router = useRouter();
   const { t } = useLocalization();
   const { colors } = useTheme();
-  const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const tabBarHeight = useBottomTabBarHeight();
+  const styles = React.useMemo(
+    () => createStyles(colors, tabBarHeight),
+    [colors, tabBarHeight]
+  );
 
   const constraints = [
     where("uid", "==", user?.uid),
@@ -92,7 +97,7 @@ const Home = () => {
 
 export default Home;
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, tabBarHeight: number) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -117,7 +122,7 @@ const createStyles = (colors: ThemeColors) =>
       width: verticalScale(50),
       borderRadius: 100,
       position: "absolute",
-      bottom: verticalScale(80),
+      bottom: tabBarHeight + verticalScale(16),
       right: verticalScale(30),
     },
     scrollViewStyle: {
