@@ -141,7 +141,34 @@ export default function CustomTabs({
               onLongPress={onLongPress}
               style={styles.tabbarItem}
             >
-              {tabbarIcons[route.name] && tabbarIcons[route.name](isFocused)}
+              <View style={styles.tabItemInner} pointerEvents="none">
+                {isFocused && (
+                  <>
+                    <LinearGradient
+                      pointerEvents="none"
+                      colors={
+                        isDarkMode ? focusDarkGradient : focusLightGradient
+                      }
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.focusGradient}
+                    />
+                    <View pointerEvents="none" style={styles.focusBorder} />
+                    <LinearGradient
+                      pointerEvents="none"
+                      colors={isDarkMode ? focusDarkSheen : focusLightSheen}
+                      start={{ x: 0.2, y: 0 }}
+                      end={{ x: 0.8, y: 1 }}
+                      locations={[0, 0.4, 1]}
+                      style={styles.focusHighlight}
+                    />
+                  </>
+                )}
+                <View style={styles.iconWrapper}>
+                  {tabbarIcons[route.name] &&
+                    tabbarIcons[route.name](isFocused)}
+                </View>
+              </View>
             </TouchableOpacity>
           );
         })}
@@ -160,6 +187,30 @@ const iosDarkGradient = [
   "rgba(255, 255, 255, 0.12)",
   "rgba(255, 255, 255, 0.04)",
   "rgba(15, 15, 15, 0.4)",
+] as const;
+
+const focusLightGradient = [
+  "rgba(255, 255, 255, 0.75)",
+  "rgba(255, 255, 255, 0.15)",
+  "rgba(255, 255, 255, 0.55)",
+] as const;
+
+const focusDarkGradient = [
+  "rgba(255, 255, 255, 0.45)",
+  "rgba(255, 255, 255, 0.1)",
+  "rgba(255, 255, 255, 0.35)",
+] as const;
+
+const focusLightSheen = [
+  "rgba(255, 255, 255, 0.8)",
+  "rgba(255, 255, 255, 0.3)",
+  "rgba(148, 163, 184, 0.25)",
+] as const;
+
+const focusDarkSheen = [
+  "rgba(255, 255, 255, 0.5)",
+  "rgba(255, 255, 255, 0.15)",
+  "rgba(30, 30, 30, 0.45)",
 ] as const;
 
 const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
@@ -211,6 +262,21 @@ const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
       height: verticalScale(48),
       zIndex: 1,
     },
+    tabItemInner: {
+      width: verticalScale(46),
+      height: verticalScale(46),
+      borderRadius: verticalScale(23),
+      justifyContent: "center",
+      alignItems: "center",
+      position: "relative",
+    },
+    iconWrapper: {
+      width: "100%",
+      height: "100%",
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: verticalScale(23),
+    },
     blurLayer: {
       ...StyleSheet.absoluteFillObject,
     },
@@ -223,5 +289,26 @@ const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
     glassHighlight: {
       ...StyleSheet.absoluteFillObject,
       opacity: isDarkMode ? 0.5 : 0.85,
+    },
+    focusGradient: {
+      ...StyleSheet.absoluteFillObject,
+      borderRadius: verticalScale(23),
+      opacity: 0.95,
+    },
+    focusBorder: {
+      ...StyleSheet.absoluteFillObject,
+      borderRadius: verticalScale(23),
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: isDarkMode
+        ? "rgba(255, 255, 255, 0.35)"
+        : "rgba(148, 163, 184, 0.5)",
+      backgroundColor: isDarkMode
+        ? "rgba(15, 15, 15, 0.25)"
+        : "rgba(255, 255, 255, 0.35)",
+    },
+    focusHighlight: {
+      ...StyleSheet.absoluteFillObject,
+      borderRadius: verticalScale(23),
+      opacity: isDarkMode ? 0.55 : 0.75,
     },
   });
