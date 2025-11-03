@@ -9,6 +9,7 @@ import {
 } from "@/types";
 import { verticalScale } from "@/utils/styling";
 import { FlashList } from "@shopify/flash-list";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Timestamp } from "firebase/firestore";
 import React from "react";
@@ -63,6 +64,17 @@ const TransactionList = ({
           )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
+        />
+        <LinearGradient
+          pointerEvents="none"
+          colors={[
+            hexToRgba(colors.appBackground, 1),
+            hexToRgba(colors.appBackground, 0),
+          ]}
+          locations={[0, 1]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.topFade}
         />
       </View>
 
@@ -175,6 +187,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     list: {
       flex: 1,
+      position: "relative",
     },
     listContent: {
       paddingBottom: spacingY._20,
@@ -207,4 +220,26 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: "flex-end",
       gap: 3,
     },
+    topFade: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: verticalScale(20),
+    },
   });
+
+function hexToRgba(hexColor: string, alpha: number) {
+  let hex = hexColor.replace("#", "");
+  if (hex.length === 3) {
+    hex = hex
+      .split("")
+      .map((char) => char + char)
+      .join("");
+  }
+  const bigint = parseInt(hex, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
