@@ -97,7 +97,7 @@ export default function CustomTabs({
             <BlurView
               pointerEvents="none"
               tint={isDarkMode ? "dark" : "light"}
-              intensity={isDarkMode ? 45 : 80}
+              intensity={isDarkMode ? 40 : 60}
               style={styles.blurLayer}
             />
             <View pointerEvents="none" style={styles.tintOverlay} />
@@ -269,15 +269,15 @@ const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
       overflow: "hidden",
       minHeight: verticalScale(56),
       backgroundColor: isDarkMode
-        ? "rgba(12, 12, 12, 0.55)"
-        : "rgba(255, 255, 255, 0.45)",
+        ? "rgba(12, 12, 12, 0.50)"
+        : "rgba(255, 255, 255, 0.38)",
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: isDarkMode
-        ? "rgba(255, 255, 255, 0.08)"
-        : "rgba(148, 163, 184, 0.35)",
+        ? "rgba(255, 255, 255, 0.06)"
+        : "rgba(148, 163, 184, 0.25)",
       shadowColor: "#000",
-      shadowOpacity: 0.18,
-      shadowRadius: 20,
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
       shadowOffset: { width: 0, height: 12 },
     },
     androidTabbar: {
