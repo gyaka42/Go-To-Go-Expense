@@ -181,6 +181,7 @@ const createStyles = (colors: ThemeColors) =>
     contiainer: {
       flex: 1,
       paddingHorizontal: spacingX._20,
+      justifyContent: "flex-start",
     },
     userInfo: {
       marginTop: verticalScale(30),
@@ -231,7 +232,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     sectionCard: {
       backgroundColor: colors.cardBackground,
-      padding: spacingX._15,
+      padding: spacingX._12,
       borderRadius: radius._15,
       borderCurve: "continuous",
       borderWidth: 1,
