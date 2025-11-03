@@ -93,6 +93,7 @@ export type TransactionListType = {
   title?: string;
   loading?: boolean;
   emptyListMessage?: string;
+  showTopFade?: boolean;
 };
 
 export type TransactionItemProps = {

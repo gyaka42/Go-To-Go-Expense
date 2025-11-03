@@ -61,6 +61,7 @@ const SearchModal = () => {
               loading={transactionsLoading}
               data={filteredTransactions}
               emptyListMessage={t("search.empty")}
+              showTopFade={false}
             />
           </View>
         </ScrollView>

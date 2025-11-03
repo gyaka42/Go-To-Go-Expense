@@ -23,6 +23,7 @@ const TransactionList = ({
   title,
   loading,
   emptyListMessage,
+  showTopFade = true,
 }: TransactionListType) => {
   const router = useRouter();
   const { colors } = useTheme();
@@ -65,17 +66,19 @@ const TransactionList = ({
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
         />
-        <LinearGradient
-          pointerEvents="none"
-          colors={[
-            hexToRgba(colors.appBackground, 1),
-            hexToRgba(colors.appBackground, 0),
-          ]}
-          locations={[0, 1]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.topFade}
-        />
+        {showTopFade && (
+          <LinearGradient
+            pointerEvents="none"
+            colors={[
+              hexToRgba(colors.appBackground, 1),
+              hexToRgba(colors.appBackground, 0),
+            ]}
+            locations={[0, 1]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.topFade}
+          />
+        )}
       </View>
 
       {!loading && data.length === 0 && (
