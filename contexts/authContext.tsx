@@ -118,7 +118,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       let msg = error instanceof Error ? error.message : String(error);
       console.log("changePassword error:", msg);
 
-      if (msg.includes("(auth/wrong-password)")) {
+      if (
+        msg.includes("(auth/wrong-password)") ||
+        msg.includes("(auth/invalid-credential)")
+      ) {
         msg = "Het huidige wachtwoord is onjuist.";
       }
 

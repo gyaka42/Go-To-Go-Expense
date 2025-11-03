@@ -231,7 +231,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     sectionCard: {
       backgroundColor: colors.cardBackground,
-      padding: spacingX._20,
+      padding: spacingX._15,
       borderRadius: radius._15,
       borderCurve: "continuous",
       borderWidth: 1,
