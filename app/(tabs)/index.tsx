@@ -1,4 +1,3 @@
-import Button from "@/components/Button";
 import HomeCard from "@/components/HomeCard";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import TransactionList from "@/components/TransactionList";
@@ -10,7 +9,6 @@ import { useTheme } from "@/contexts/themeContext";
 import useFetchData from "@/hooks/useFetchData";
 import { TransactionType } from "@/types";
 import { verticalScale } from "@/utils/styling";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useRouter } from "expo-router";
 import { limit, orderBy, where } from "firebase/firestore";
 import * as Icons from "phosphor-react-native";
@@ -22,11 +20,7 @@ const Home = () => {
   const router = useRouter();
   const { t } = useLocalization();
   const { colors } = useTheme();
-  const tabBarHeight = useBottomTabBarHeight();
-  const styles = React.useMemo(
-    () => createStyles(colors, tabBarHeight),
-    [colors, tabBarHeight]
-  );
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   const constraints = [
     where("uid", "==", user?.uid),
@@ -79,17 +73,6 @@ const Home = () => {
             emptyListMessage={t("home.noTransactions")}
           />
         </ScrollView>
-
-        <Button
-          style={styles.floatingButton}
-          onPress={() => router.push("/(modals)/transactionModal")}
-        >
-          <Icons.PlusIcon
-            color={colors.black}
-            weight="bold"
-            size={verticalScale(24)}
-          />
-        </Button>
       </View>
     </ScreenWrapper>
   );
@@ -97,7 +80,7 @@ const Home = () => {
 
 export default Home;
 
-const createStyles = (colors: ThemeColors, tabBarHeight: number) =>
+const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -117,14 +100,7 @@ const createStyles = (colors: ThemeColors, tabBarHeight: number) =>
       borderWidth: 1,
       borderColor: colors.borderColor,
     },
-    floatingButton: {
-      height: verticalScale(50),
-      width: verticalScale(50),
-      borderRadius: 100,
-      position: "absolute",
-      bottom: tabBarHeight + verticalScale(16),
-      right: verticalScale(30),
-    },
+
     scrollViewStyle: {
       marginTop: spacingY._10,
       paddingBottom: verticalScale(100),

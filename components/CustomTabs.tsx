@@ -4,6 +4,7 @@ import { verticalScale } from "@/utils/styling";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import * as Icons from "phosphor-react-native";
 import React from "react";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -15,6 +16,7 @@ export default function CustomTabs({
   insets,
 }: BottomTabBarProps) {
   const { colors, isDarkMode } = useTheme();
+  const router = useRouter();
   const styles = React.useMemo(
     () => createStyles(colors, isDarkMode),
     [colors, isDarkMode]
@@ -59,6 +61,10 @@ export default function CustomTabs({
     }),
     [colors]
   );
+  const handleAddTransaction = React.useCallback(() => {
+    router.push("/(modals)/transactionModal");
+  }, [router]);
+
   return (
     <View
       pointerEvents={isIOS ? "box-none" : "auto"}
@@ -106,72 +112,99 @@ export default function CustomTabs({
           </>
         )}
 
-        {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
+        {(() => {
+          const tabItems: React.ReactNode[] = [];
 
-          const isFocused = state.index === index;
+          state.routes.forEach((route, index) => {
+            const { options } = descriptors[route.key];
 
-          const onPress = () => {
-            const event = navigation.emit({
-              type: "tabPress",
-              target: route.key,
-              canPreventDefault: true,
-            });
+            const isFocused = state.index === index;
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params);
+            const onPress = () => {
+              const event = navigation.emit({
+                type: "tabPress",
+                target: route.key,
+                canPreventDefault: true,
+              });
+
+              if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate(route.name, route.params);
+              }
+            };
+
+            const onLongPress = () => {
+              navigation.emit({
+                type: "tabLongPress",
+                target: route.key,
+              });
+            };
+
+            if (index === 2) {
+              tabItems.push(
+                <TouchableOpacity
+                  key="add-transaction"
+                  accessibilityLabel="Add transaction"
+                  accessibilityRole="button"
+                  onPress={handleAddTransaction}
+                  style={styles.centerButton}
+                  activeOpacity={0.85}
+                >
+                  <View style={styles.centerButtonInner} pointerEvents="none">
+                    <Icons.PlusIcon
+                      size={verticalScale(28)}
+                      weight="bold"
+                      color={colors.black}
+                    />
+                  </View>
+                </TouchableOpacity>
+              );
             }
-          };
 
-          const onLongPress = () => {
-            navigation.emit({
-              type: "tabLongPress",
-              target: route.key,
-            });
-          };
-
-          return (
-            <TouchableOpacity
-              key={route.key ?? `${route.name}:${index}`}
-              //href={buildHref(route.name, route.params)}
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-              testID={options.tabBarButtonTestID}
-              onPress={onPress}
-              onLongPress={onLongPress}
-              style={styles.tabbarItem}
-            >
-              <View style={styles.tabItemInner} pointerEvents="none">
-                {isFocused && (
-                  <>
-                    <LinearGradient
-                      pointerEvents="none"
-                      colors={
-                        isDarkMode ? focusDarkGradient : focusLightGradient
-                      }
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.focusGradient}
-                    />
-                    <View pointerEvents="none" style={styles.focusBorder} />
-                    <LinearGradient
-                      pointerEvents="none"
-                      colors={isDarkMode ? focusDarkSheen : focusLightSheen}
-                      start={{ x: 0.2, y: 0 }}
-                      end={{ x: 0.8, y: 1 }}
-                      locations={[0, 0.4, 1]}
-                      style={styles.focusHighlight}
-                    />
-                  </>
-                )}
-                <View style={styles.iconWrapper}>
-                  {tabbarIcons[route.name] &&
-                    tabbarIcons[route.name](isFocused)}
+            tabItems.push(
+              <TouchableOpacity
+                key={route.key ?? `${route.name}:${index}`}
+                //href={buildHref(route.name, route.params)}
+                accessibilityState={isFocused ? { selected: true } : {}}
+                accessibilityLabel={options.tabBarAccessibilityLabel}
+                testID={options.tabBarButtonTestID}
+                onPress={onPress}
+                onLongPress={onLongPress}
+                style={styles.tabbarItem}
+              >
+                <View style={styles.tabItemInner} pointerEvents="none">
+                  {isFocused && (
+                    <>
+                      <LinearGradient
+                        pointerEvents="none"
+                        colors={
+                          isDarkMode ? focusDarkGradient : focusLightGradient
+                        }
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.focusGradient}
+                      />
+                      <View pointerEvents="none" style={styles.focusBorder} />
+                      <LinearGradient
+                        pointerEvents="none"
+                        colors={isDarkMode ? focusDarkSheen : focusLightSheen}
+                        start={{ x: 0.2, y: 0 }}
+                        end={{ x: 0.8, y: 1 }}
+                        locations={[0, 0.4, 1]}
+                        style={styles.focusHighlight}
+                      />
+                    </>
+                  )}
+                  <View style={styles.iconWrapper}>
+                    {tabbarIcons[route.name] &&
+                      tabbarIcons[route.name](isFocused)}
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
+              </TouchableOpacity>
+            );
+          });
+
+          return tabItems;
+        })()}
       </View>
     </View>
   );
@@ -276,6 +309,34 @@ const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
       justifyContent: "center",
       alignItems: "center",
       borderRadius: verticalScale(23),
+    },
+    centerButton: {
+      width: verticalScale(54),
+      height: verticalScale(54),
+      borderRadius: verticalScale(29),
+      justifyContent: "center",
+      alignItems: "center",
+      marginHorizontal: spacingX._5,
+      backgroundColor: colors.cardBackground,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.borderColor,
+      shadowColor: "#000",
+      shadowOpacity: isDarkMode ? 0.35 : 0.18,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 6,
+    },
+    centerButtonInner: {
+      width: verticalScale(46),
+      height: verticalScale(46),
+      borderRadius: verticalScale(26),
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.primaryLight,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: isDarkMode
+        ? "rgba(255, 255, 255, 0.12)"
+        : "rgba(148, 163, 184, 0.35)",
     },
     blurLayer: {
       ...StyleSheet.absoluteFillObject,
