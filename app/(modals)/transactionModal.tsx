@@ -368,7 +368,7 @@ const TransactionModal = () => {
                     style={styles.datePickerButton}
                     onPress={() => setShowDatePicker(false)}
                   >
-                    <Typo size={15} fontWeight={"500"}>
+                    <Typo size={15} fontWeight={"500"} color="black">
                       {t("common.ok")}
                     </Typo>
                   </TouchableOpacity>
