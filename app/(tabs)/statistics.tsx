@@ -15,7 +15,7 @@ import { scale, verticalScale } from "@/utils/styling";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { useFocusEffect } from "expo-router";
 import React, { useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 
 const Statistics = () => {
@@ -106,81 +106,75 @@ const Statistics = () => {
         <View style={styles.header}>
           <Header title={t("statistics.title")} />
         </View>
-        <ScrollView
-          contentContainerStyle={{
-            gap: spacingY._20,
-            paddingTop: spacingY._5,
-            paddingBottom: verticalScale(100),
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.segmentWrapper}>
-            <SegmentedControl
-              values={[
-                t("statistics.segments.weekly"),
-                t("statistics.segments.monthly"),
-                t("statistics.segments.yearly"),
-              ]}
-              selectedIndex={activeIndex}
-              onChange={(event) => {
-                setActiveIndex(event.nativeEvent.selectedSegmentIndex);
-              }}
-              tintColor={colors.primaryLight}
-              backgroundColor={colors.cardBackground}
-              appearance={isDarkMode ? "dark" : "light"}
-              activeFontStyle={styles.segmentFontStyle}
-              style={styles.segmentStyle}
-              fontStyle={{
-                ...styles.segmentFontStyle,
-                color: colors.neutral400,
-              }}
-            />
-          </View>
-          <View style={styles.chartContainer}>
-            {chartData.length > 0 ? (
-              <BarChart
-                data={chartData}
-                barWidth={scale(12)}
-                spacing={[1, 2].includes(activeIndex) ? scale(25) : scale(16)}
-                roundedTop
-                roundedBottom
-                hideRules
-                yAxisLabelPrefix="€"
-                yAxisThickness={0}
-                xAxisThickness={0}
-                yAxisLabelWidth={yAxisLabelWidth}
-                yAxisTextStyle={{ color: colors.neutral400 }}
-                xAxisLabelTextStyle={{
-                  color: colors.neutral400,
-                  fontSize: verticalScale(12),
+
+        <View style={styles.content}>
+          <View style={styles.controls}>
+            <View style={styles.segmentWrapper}>
+              <SegmentedControl
+                values={[
+                  t("statistics.segments.weekly"),
+                  t("statistics.segments.monthly"),
+                  t("statistics.segments.yearly"),
+                ]}
+                selectedIndex={activeIndex}
+                onChange={(event) => {
+                  setActiveIndex(event.nativeEvent.selectedSegmentIndex);
                 }}
-                noOfSections={3}
-                minHeight={5}
-                isAnimated={true}
-                animationDuration={1000}
-                //maxValue={100}
+                tintColor={colors.primaryLight}
+                backgroundColor={colors.cardBackground}
+                appearance={isDarkMode ? "dark" : "light"}
+                activeFontStyle={styles.segmentFontStyle}
+                style={styles.segmentStyle}
+                fontStyle={{
+                  ...styles.segmentFontStyle,
+                  color: colors.neutral400,
+                }}
               />
-            ) : (
-              <View style={styles.noChart} />
-            )}
+            </View>
+            <View style={styles.chartContainer}>
+              {chartData.length > 0 ? (
+                <BarChart
+                  data={chartData}
+                  barWidth={scale(12)}
+                  spacing={[1, 2].includes(activeIndex) ? scale(25) : scale(16)}
+                  roundedTop
+                  roundedBottom
+                  hideRules
+                  yAxisLabelPrefix="€"
+                  yAxisThickness={0}
+                  xAxisThickness={0}
+                  yAxisLabelWidth={yAxisLabelWidth}
+                  yAxisTextStyle={{ color: colors.neutral400 }}
+                  xAxisLabelTextStyle={{
+                    color: colors.neutral400,
+                    fontSize: verticalScale(12),
+                  }}
+                  noOfSections={3}
+                  minHeight={5}
+                  isAnimated={true}
+                  animationDuration={1000}
+                  //maxValue={100}
+                />
+              ) : (
+                <View style={styles.noChart} />
+              )}
 
-            {chartLoading && (
-              <View style={styles.chartLoadingContainer}>
-                <Loading color={colors.text} />
-              </View>
-            )}
+              {chartLoading && (
+                <View style={styles.chartLoadingContainer}>
+                  <Loading color={colors.text} />
+                </View>
+              )}
+            </View>
           </View>
 
-          {/*Transactions*/}
-
-          <View>
+          <View style={styles.transactionsWrapper}>
             <TransactionList
               title={t("statistics.transactionsTitle")}
               emptyListMessage={t("statistics.transactionsEmpty")}
               data={transactions}
             />
           </View>
-        </ScrollView>
+        </View>
       </View>
     </ScreenWrapper>
   );
@@ -209,6 +203,20 @@ const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
       justifyContent: "center",
       alignItems: "center",
     },
+    container: {
+      flex: 1,
+      paddingHorizontal: spacingX._20,
+      paddingVertical: spacingY._5,
+      gap: spacingY._10,
+    },
+    content: {
+      flex: 1,
+      gap: spacingY._20,
+      paddingBottom: verticalScale(12),
+    },
+    controls: {
+      gap: spacingY._20,
+    },
     header: {},
     noChart: {
       backgroundColor: colors.cardBackground,
@@ -236,9 +244,7 @@ const createStyles = (colors: ThemeColors, isDarkMode: boolean) =>
       fontWeight: "bold",
       color: colors.text,
     },
-    container: {
-      paddingHorizontal: spacingX._20,
-      paddingVertical: spacingY._5,
-      gap: spacingY._10,
+    transactionsWrapper: {
+      flex: 1,
     },
   });
