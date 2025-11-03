@@ -11,28 +11,89 @@ import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
 import * as Icons from "phosphor-react-native";
 import React, { useRef, useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  InputAccessoryView,
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const Register = () => {
-  const emailRef = useRef("");
-  const passwordRef = useRef("");
-  const nameRef = useRef("");
+  const emailValueRef = useRef("");
+  const passwordValueRef = useRef("");
+  const nameValueRef = useRef("");
+  const nameInputRef = useRef<TextInput>(null);
+  const emailInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+  const [focusedField, setFocusedField] = useState<
+    "name" | "email" | "password" | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { register: registerUser } = useAuth();
   const { t } = useLocalization();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const inputAccessoryViewID = "registerInputsAccessory";
+
+  const focusField = (field: "name" | "email" | "password") => {
+    if (field === "name") {
+      nameInputRef.current?.focus();
+      return;
+    }
+    if (field === "email") {
+      emailInputRef.current?.focus();
+      return;
+    }
+    passwordInputRef.current?.focus();
+  };
+
+  const handlePrevious = () => {
+    if (focusedField === "password") {
+      focusField("email");
+      return;
+    }
+    if (focusedField === "email") {
+      focusField("name");
+    }
+  };
+
+  const handleNext = () => {
+    if (focusedField === "name") {
+      focusField("email");
+      return;
+    }
+    if (focusedField === "email") {
+      focusField("password");
+    }
+  };
+
+  const handleDone = () => {
+    Keyboard.dismiss();
+    if (focusedField === "password") {
+      handleSubmit();
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!emailRef.current || !passwordRef.current || !nameRef.current) {
+    if (
+      !emailValueRef.current ||
+      !passwordValueRef.current ||
+      !nameValueRef.current
+    ) {
       Alert.alert(t("auth.register.title"), t("auth.common.fillFields"));
       return;
     }
     setIsLoading(true);
     const res = await registerUser(
-      emailRef.current,
-      passwordRef.current,
-      nameRef.current
+      emailValueRef.current,
+      passwordValueRef.current,
+      nameValueRef.current
     );
     setIsLoading(false);
     console.log("register result", res);
@@ -63,7 +124,15 @@ const Register = () => {
           {/* Hier komt Input */}
           <Input
             placeholder={t("auth.register.namePlaceholder")}
-            onChangeText={(value) => (nameRef.current = value)}
+            inputRef={nameInputRef}
+            onFocus={() => setFocusedField("name")}
+            onChangeText={(value) => (nameValueRef.current = value)}
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => focusField("email")}
+            inputAccessoryViewID={
+              Platform.OS === "ios" ? inputAccessoryViewID : undefined
+            }
             icon={
               <Icons.UserIcon
                 size={verticalScale(26)}
@@ -76,7 +145,15 @@ const Register = () => {
             placeholder={t("auth.common.emailPlaceholder")}
             autoCapitalize="none"
             keyboardType="email-address"
-            onChangeText={(value) => (emailRef.current = value)}
+            inputRef={emailInputRef}
+            onFocus={() => setFocusedField("email")}
+            onChangeText={(value) => (emailValueRef.current = value)}
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => focusField("password")}
+            inputAccessoryViewID={
+              Platform.OS === "ios" ? inputAccessoryViewID : undefined
+            }
             icon={
               <Icons.AtIcon
                 size={verticalScale(26)}
@@ -87,7 +164,14 @@ const Register = () => {
           <Input
             placeholder={t("auth.common.passwordPlaceholder")}
             secureTextEntry
-            onChangeText={(value) => (passwordRef.current = value)}
+            inputRef={passwordInputRef}
+            onFocus={() => setFocusedField("password")}
+            onChangeText={(value) => (passwordValueRef.current = value)}
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit}
+            inputAccessoryViewID={
+              Platform.OS === "ios" ? inputAccessoryViewID : undefined
+            }
             icon={
               <Icons.LockIcon
                 size={verticalScale(26)}
@@ -103,6 +187,52 @@ const Register = () => {
             </Typo>
           </Button>
         </View>
+
+        {Platform.OS === "ios" && (
+          <InputAccessoryView nativeID={inputAccessoryViewID}>
+            <View
+              style={[
+                styles.inputAccessory,
+                { borderColor: colors.borderColor },
+              ]}
+            >
+              <View style={styles.accessoryControls}>
+                <TouchableOpacity
+                  onPress={handlePrevious}
+                  disabled={focusedField === "name"}
+                  style={styles.accessoryButton}
+                >
+                  <Icons.ArrowUpIcon
+                    size={18}
+                    color={
+                      focusedField === "name" ? colors.neutral400 : colors.text
+                    }
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleNext}
+                  disabled={focusedField === "password"}
+                  style={styles.accessoryButton}
+                >
+                  <Icons.ArrowDownIcon
+                    size={18}
+                    color={
+                      focusedField === "password"
+                        ? colors.neutral400
+                        : colors.text
+                    }
+                  />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                onPress={handleDone}
+                style={styles.accessorySubmitButton}
+              >
+                <Icons.CheckIcon size={20} color={colors.primaryLight} />
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+        )}
 
         {/* Footer komt hier */}
 
@@ -141,5 +271,24 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.text,
       textAlign: "center",
       fontSize: verticalScale(15),
+    },
+    inputAccessory: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: spacingX._15,
+      paddingVertical: spacingY._10,
+      backgroundColor: colors.neutral100,
+      borderTopWidth: StyleSheet.hairlineWidth,
+    },
+    accessoryControls: {
+      flexDirection: "row",
+      gap: spacingX._10,
+    },
+    accessoryButton: {
+      padding: spacingX._10,
+    },
+    accessorySubmitButton: {
+      padding: spacingX._10,
     },
   });

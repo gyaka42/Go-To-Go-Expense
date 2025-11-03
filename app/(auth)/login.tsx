@@ -11,24 +11,71 @@ import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
 import * as Icons from "phosphor-react-native";
 import React, { useRef, useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  InputAccessoryView,
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const Login = () => {
-  const emailRef = useRef("");
-  const passwordRef = useRef("");
+  const emailValueRef = useRef("");
+  const passwordValueRef = useRef("");
+  const emailInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+  const [focusedField, setFocusedField] = useState<"email" | "password" | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login: loginUser } = useAuth();
   const { t } = useLocalization();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const inputAccessoryViewID = "loginInputsAccessory";
+
+  const focusField = (field: "email" | "password") => {
+    if (field === "email") {
+      emailInputRef.current?.focus();
+    } else {
+      passwordInputRef.current?.focus();
+    }
+  };
+
+  const handlePrevious = () => {
+    if (focusedField === "password") {
+      focusField("email");
+    }
+  };
+
+  const handleNext = () => {
+    if (focusedField === "email") {
+      focusField("password");
+    }
+  };
+
+  const handleDone = () => {
+    Keyboard.dismiss();
+    if (focusedField === "password") {
+      handleSubmit();
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!emailRef.current || !passwordRef.current) {
+    if (!emailValueRef.current || !passwordValueRef.current) {
       Alert.alert(t("auth.login.title"), t("auth.common.fillFields"));
       return;
     }
     setIsLoading(true);
-    const res = await loginUser(emailRef.current, passwordRef.current);
+    const res = await loginUser(
+      emailValueRef.current,
+      passwordValueRef.current
+    );
     setIsLoading(false);
     if (!res.success) {
       Alert.alert(t("auth.login.title"), res.msg);
@@ -59,7 +106,15 @@ const Login = () => {
             placeholder={t("auth.common.emailPlaceholder")}
             autoCapitalize="none"
             keyboardType="email-address"
-            onChangeText={(value) => (emailRef.current = value)}
+            inputRef={emailInputRef}
+            onFocus={() => setFocusedField("email")}
+            onChangeText={(value) => (emailValueRef.current = value)}
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => focusField("password")}
+            inputAccessoryViewID={
+              Platform.OS === "ios" ? inputAccessoryViewID : undefined
+            }
             icon={
               <Icons.AtIcon
                 size={verticalScale(26)}
@@ -70,7 +125,14 @@ const Login = () => {
           <Input
             placeholder={t("auth.common.passwordPlaceholder")}
             secureTextEntry
-            onChangeText={(value) => (passwordRef.current = value)}
+            inputRef={passwordInputRef}
+            onFocus={() => setFocusedField("password")}
+            onChangeText={(value) => (passwordValueRef.current = value)}
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit}
+            inputAccessoryViewID={
+              Platform.OS === "ios" ? inputAccessoryViewID : undefined
+            }
             icon={
               <Icons.LockIcon
                 size={verticalScale(26)}
@@ -93,6 +155,51 @@ const Login = () => {
             </Typo>
           </Button>
         </View>
+        {Platform.OS === "ios" && (
+          <InputAccessoryView nativeID={inputAccessoryViewID}>
+            <View
+              style={[
+                styles.inputAccessory,
+                { borderColor: colors.borderColor },
+              ]}
+            >
+              <View style={styles.accessoryControls}>
+                <TouchableOpacity
+                  onPress={handlePrevious}
+                  disabled={focusedField !== "password"}
+                  style={styles.accessoryButton}
+                >
+                  <Icons.ArrowUpIcon
+                    size={18}
+                    color={
+                      focusedField === "password"
+                        ? colors.text
+                        : colors.neutral400
+                    }
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleNext}
+                  disabled={focusedField !== "email"}
+                  style={styles.accessoryButton}
+                >
+                  <Icons.ArrowDownIcon
+                    size={18}
+                    color={
+                      focusedField === "email" ? colors.text : colors.neutral400
+                    }
+                  />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                onPress={handleDone}
+                style={styles.accessorySubmitButton}
+              >
+                <Icons.CheckIcon size={20} color={colors.primaryLight} />
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+        )}
 
         {/* Footer komt hier */}
 
@@ -136,5 +243,24 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.text,
       textAlign: "center",
       fontSize: verticalScale(15),
+    },
+    inputAccessory: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: spacingX._15,
+      paddingVertical: spacingY._10,
+      backgroundColor: colors.neutral100,
+      borderTopWidth: StyleSheet.hairlineWidth,
+    },
+    accessoryControls: {
+      flexDirection: "row",
+      gap: spacingX._10,
+    },
+    accessoryButton: {
+      padding: spacingX._10,
+    },
+    accessorySubmitButton: {
+      padding: spacingX._10,
     },
   });
