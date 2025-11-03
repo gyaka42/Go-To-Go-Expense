@@ -2,10 +2,13 @@ import { auth, firestore } from "@/config/firebase";
 import { AuthContextType, UserType } from "@/types";
 import { useRouter } from "expo-router";
 import {
+  EmailAuthProvider,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  updatePassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -90,6 +93,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const changePassword = async (
+    currentPassword: string,
+    newPassword: string
+  ) => {
+    const currentUser = auth.currentUser;
+
+    if (!currentUser || !currentUser.email) {
+      return {
+        success: false,
+        msg: "Geen gebruiker aangemeld.",
+      };
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(
+        currentUser.email,
+        currentPassword
+      );
+      await reauthenticateWithCredential(currentUser, credential);
+      await updatePassword(currentUser, newPassword);
+      return { success: true };
+    } catch (error: unknown) {
+      let msg = error instanceof Error ? error.message : String(error);
+      console.log("changePassword error:", msg);
+
+      if (msg.includes("(auth/wrong-password)")) {
+        msg = "Het huidige wachtwoord is onjuist.";
+      }
+
+      if (msg.includes("(auth/weak-password)")) {
+        msg = "Het nieuwe wachtwoord is te zwak.";
+      }
+
+      if (msg.includes("(auth/too-many-requests)")) {
+        msg = "Te veel pogingen. Probeer het later opnieuw.";
+      }
+
+      return { success: false, msg };
+    }
+  };
+
   const updateUserData = async (uid: string) => {
     try {
       const docRef = doc(firestore, "users", uid);
@@ -117,6 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     register,
     resetPassword,
     updateUserData,
+    changePassword,
   };
 
   return (

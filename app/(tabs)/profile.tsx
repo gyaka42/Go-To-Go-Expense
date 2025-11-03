@@ -33,6 +33,13 @@ const Profile = () => {
       bgColor: "#6366f1",
     },
     {
+      key: "changePassword",
+      titleKey: "profile.options.changePassword",
+      icon: <Icons.KeyIcon size={26} color={colors.white} weight="fill" />,
+      routeName: "/(modals)/changePasswordModal",
+      bgColor: "#0ea5e9",
+    },
+    {
       key: "settings",
       titleKey: "profile.options.settings",
       icon: <Icons.GearSixIcon size={26} color={colors.white} weight="fill" />,

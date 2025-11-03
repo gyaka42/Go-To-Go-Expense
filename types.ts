@@ -155,6 +155,10 @@ export type AuthContextType = {
     msg?: string;
   }>;
   updateUserData: (userId: string) => Promise<void>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<{ success: boolean; msg?: string }>;
 };
 
 export type ResponseType = {
