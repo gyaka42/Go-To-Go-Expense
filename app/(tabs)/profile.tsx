@@ -10,7 +10,7 @@ import { getProfileImage } from "@/services/imageService";
 import { accountOptionType } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { signOut } from "firebase/auth";
 import * as Icons from "phosphor-react-native";
 import React from "react";
@@ -20,7 +20,6 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 const Profile = () => {
   const { user } = useAuth();
   const { t } = useLocalization();
-  const router = useRouter();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
 
@@ -85,14 +84,6 @@ const Profile = () => {
     );
   };
 
-  const handlePress = (item: accountOptionType) => {
-    if (item.key === "logout") {
-      showLogoutAlert();
-    }
-
-    if (item.routeName) router.push(item.routeName);
-  };
-
   return (
     <ScreenWrapper>
       <View style={styles.contiainer}>
@@ -128,9 +119,37 @@ const Profile = () => {
         {/* account opties */}
         <View style={[styles.sectionCard, styles.accountOptions]}>
           {accountOptions.map((item, index) => {
+            const optionContent = (
+              <TouchableOpacity
+                style={styles.flexRow}
+                onPress={item.key === "logout" ? showLogoutAlert : undefined}
+                activeOpacity={0.85}
+              >
+                {/* Icon */}
+                <View
+                  style={[
+                    styles.listIcon,
+                    {
+                      backgroundColor: item?.bgColor,
+                    },
+                  ]}
+                >
+                  {item.icon && item.icon}
+                </View>
+                <Typo size={16} style={{ flex: 1 }} fontWeight={"500"}>
+                  {t(item.titleKey)}
+                </Typo>
+                <Icons.CaretRightIcon
+                  size={verticalScale(20)}
+                  weight="bold"
+                  color={colors.neutral400}
+                />
+              </TouchableOpacity>
+            );
+
             return (
               <Animated.View
-                key={index.toString()}
+                key={item.key}
                 entering={FadeInDown.delay(index * 50)
                   .springify()
                   .damping(36)}
@@ -139,30 +158,13 @@ const Profile = () => {
                   index === accountOptions.length - 1 && styles.lastListItem,
                 ]}
               >
-                <TouchableOpacity
-                  style={styles.flexRow}
-                  onPress={() => handlePress(item)}
-                >
-                  {/* Icon */}
-                  <View
-                    style={[
-                      styles.listIcon,
-                      {
-                        backgroundColor: item?.bgColor,
-                      },
-                    ]}
-                  >
-                    {item.icon && item.icon}
-                  </View>
-                  <Typo size={16} style={{ flex: 1 }} fontWeight={"500"}>
-                    {t(item.titleKey)}
-                  </Typo>
-                  <Icons.CaretRightIcon
-                    size={verticalScale(20)}
-                    weight="bold"
-                    color={colors.neutral400}
-                  />
-                </TouchableOpacity>
+                {item.key === "logout" || !item.routeName ? (
+                  optionContent
+                ) : (
+                  <Link href={item.routeName} asChild>
+                    {optionContent}
+                  </Link>
+                )}
               </Animated.View>
             );
           })}
