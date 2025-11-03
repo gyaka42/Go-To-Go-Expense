@@ -52,7 +52,7 @@ const TransactionList = ({
       )}
 
       <View style={styles.list}>
-        <FlashList
+        <FlashList<TransactionType>
           data={data}
           renderItem={({ item, index }) => (
             <TransactionItem
@@ -61,6 +61,8 @@ const TransactionList = ({
               handleClick={handleClick}
             />
           )}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
         />
       </View>
 
@@ -168,10 +170,14 @@ export default TransactionList;
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: {
+      flex: 1,
       gap: spacingY._17,
     },
     list: {
-      minHeight: 3,
+      flex: 1,
+    },
+    listContent: {
+      paddingBottom: spacingY._20,
     },
     row: {
       flexDirection: "row",

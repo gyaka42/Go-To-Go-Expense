@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { limit, orderBy, where } from "firebase/firestore";
 import * as Icons from "phosphor-react-native";
 import React from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 const Home = () => {
   const { user } = useAuth();
@@ -56,23 +56,22 @@ const Home = () => {
           </TouchableOpacity>
         </View>
 
-        <ScrollView
-          contentContainerStyle={styles.scrollViewStyle}
-          showsVerticalScrollIndicator={false}
-        >
+        <View style={styles.content}>
           {/* CARD */}
-          <View>
+          <View style={styles.cardWrapper}>
             <HomeCard />
           </View>
 
           {/* Transacties */}
-          <TransactionList
-            data={recentTransactions}
-            loading={loadingTransactions}
-            title={t("home.recentTransactionsTitle")}
-            emptyListMessage={t("home.noTransactions")}
-          />
-        </ScrollView>
+          <View style={styles.transactionsWrapper}>
+            <TransactionList
+              data={recentTransactions}
+              loading={loadingTransactions}
+              title={t("home.recentTransactionsTitle")}
+              emptyListMessage={t("home.noTransactions")}
+            />
+          </View>
+        </View>
       </View>
     </ScreenWrapper>
   );
@@ -86,6 +85,9 @@ const createStyles = (colors: ThemeColors) =>
       flex: 1,
       paddingHorizontal: spacingX._20,
       marginTop: verticalScale(8),
+    },
+    content: {
+      flex: 1,
     },
     header: {
       flexDirection: "row",
@@ -101,9 +103,10 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.borderColor,
     },
 
-    scrollViewStyle: {
-      marginTop: spacingY._10,
-      paddingBottom: verticalScale(100),
-      gap: spacingY._25,
+    cardWrapper: {
+      marginBottom: spacingY._25,
+    },
+    transactionsWrapper: {
+      flex: 1,
     },
   });
