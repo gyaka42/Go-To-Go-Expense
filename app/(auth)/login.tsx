@@ -57,6 +57,8 @@ const Login = () => {
           {/* Hier komt Input */}
           <Input
             placeholder={t("auth.common.emailPlaceholder")}
+            autoCapitalize="none"
+            keyboardType="email-address"
             onChangeText={(value) => (emailRef.current = value)}
             icon={
               <Icons.AtIcon
