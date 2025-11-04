@@ -10,7 +10,7 @@ import useFetchData from "@/hooks/useFetchData";
 import { WalletType } from "@/types";
 import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
-import { orderBy, where } from "firebase/firestore";
+import { or, where } from "firebase/firestore";
 import * as Icons from "phosphor-react-native";
 import React, { useMemo } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -23,7 +23,13 @@ const Wallet = () => {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const constraints = useMemo(() => {
     if (!user?.uid) return [];
-    return [where("uid", "==", user.uid), orderBy("created", "desc")];
+    return [
+      or(
+        where("uid", "==", user.uid),
+        where("ownerIds", "array-contains", user.uid),
+        where("participantIds", "array-contains", user.uid)
+      ),
+    ];
   }, [user?.uid]);
 
   const {
@@ -32,10 +38,25 @@ const Wallet = () => {
     error,
   } = useFetchData<WalletType>("wallets", constraints, [user?.uid]);
 
-  console.log("wallets:", wallets.length, { loading, error });
+  const walletList = useMemo(() => {
+    const map = new Map<string, WalletType>();
+    wallets.forEach((wallet) => {
+      const id = (wallet as any).id as string | undefined;
+      if (id) {
+        map.set(id, wallet);
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => {
+      const createdA = (a as any).created ?? (a as any).createdAt ?? 0;
+      const createdB = (b as any).created ?? (b as any).createdAt ?? 0;
+      const timeA = createdA instanceof Date ? createdA.getTime() : createdA;
+      const timeB = createdB instanceof Date ? createdB.getTime() : createdB;
+      return Number(timeB) - Number(timeA);
+    });
+  }, [wallets]);
 
   const getTotalBalance = () =>
-    wallets.reduce((total, item) => {
+    walletList.reduce((total, item) => {
       total = total + (item.amount || 0);
       return total;
     }, 0);
@@ -85,7 +106,7 @@ const Wallet = () => {
             <Loading />
           ) : (
             <FlatList
-              data={wallets}
+              data={walletList}
               keyExtractor={(item) => (item as any).id}
               renderItem={({ item, index }) => (
                 <WalletListItem item={item} index={index} router={router} />

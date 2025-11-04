@@ -24,6 +24,7 @@
         "NSCameraUsageDescription": "We gebruiken je camera om bonnen of afbeeldingen te uploaden.",
         "NSPhotoLibraryUsageDescription": "We hebben toegang tot je fotobibliotheek nodig om afbeeldingen te kiezen voor je profiel en wallets.",
         "NSPhotoLibraryAddUsageDescription": "We hebben toestemming nodig om afbeeldingen op te slaan die binnen de app worden gemaakt of bewerkt.",
+        "NSFaceIDUsageDescription": "We gebruiken Face ID/Touch ID om jouw gegevens te beveiligen.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },

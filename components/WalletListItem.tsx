@@ -1,4 +1,5 @@
 import { ThemeColors, radius, spacingX } from "@/constants/theme";
+import { useLocalization } from "@/contexts/localizationContext";
 import { useTheme } from "@/contexts/themeContext";
 import { WalletType } from "@/types";
 import { verticalScale } from "@/utils/styling";
@@ -21,13 +22,24 @@ const WalletListItem = ({
 }) => {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const { t } = useLocalization();
   const openWallet = () => {
+    if (!item?.id) return;
+    router.push({
+      pathname: "/wallet/[id]",
+      params: { id: item.id },
+    });
+  };
+
+  const openEdit = () => {
     router.push({
       pathname: "/(modals)/walletModal",
       params: {
         id: item?.id,
         name: item?.name,
         image: item?.image,
+        isPrivate: item?.isPrivate ? "1" : "0",
+        currency: item?.currency,
       },
     });
   };
@@ -51,12 +63,27 @@ const WalletListItem = ({
           <Typo size={14} color={colors.neutral400}>
             € {item?.amount},-
           </Typo>
+          {item?.isPrivate ? (
+            <View style={styles.badge}>
+              <Typo size={11} color={colors.black}>
+                {t("wallet.privateBadge")}
+              </Typo>
+            </View>
+          ) : null}
         </View>
-        <Icons.CaretRightIcon
-          size={verticalScale(20)}
-          weight="bold"
-          color={colors.neutral400}
-        />
+        <View style={styles.actionIcons}>
+          <TouchableOpacity onPress={openEdit} style={styles.editButton}>
+            <Icons.PencilSimpleIcon
+              size={verticalScale(18)}
+              color={colors.neutral400}
+            />
+          </TouchableOpacity>
+          <Icons.CaretRightIcon
+            size={verticalScale(20)}
+            weight="bold"
+            color={colors.neutral400}
+          />
+        </View>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -84,5 +111,22 @@ const createStyles = (colors: ThemeColors) =>
       flex: 1,
       gap: 2,
       marginLeft: spacingX._10,
+    },
+    badge: {
+      alignSelf: "flex-start",
+      paddingHorizontal: spacingX._5,
+      paddingVertical: 2,
+      backgroundColor: colors.primaryLight,
+      borderRadius: radius._6,
+      borderCurve: "continuous",
+      marginTop: 4,
+    },
+    actionIcons: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacingX._5,
+    },
+    editButton: {
+      padding: 4,
     },
   });

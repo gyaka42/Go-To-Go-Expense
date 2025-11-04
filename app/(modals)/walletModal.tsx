@@ -15,18 +15,25 @@ import { scale, verticalScale } from "@/utils/styling";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Icons from "phosphor-react-native";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, View } from "react-native";
 
 const WalletModal = () => {
   const router = useRouter();
 
-  const oldWallet: { name: string; image: string; id: string } =
-    useLocalSearchParams();
+  const oldWallet: {
+    name: string;
+    image: string;
+    id: string;
+    isPrivate?: string;
+    currency?: string;
+  } = useLocalSearchParams();
   useEffect(() => {
     if (oldWallet?.id) {
       setWallet({
         name: oldWallet?.name,
         image: oldWallet?.image,
+        currency: oldWallet?.currency || "EUR",
+        isPrivate: oldWallet?.isPrivate === "1",
       });
     }
   }, []);
@@ -39,10 +46,12 @@ const WalletModal = () => {
   const [wallet, setWallet] = useState<WalletType>({
     name: "",
     image: null,
+    currency: "EUR",
+    isPrivate: false,
   });
 
   const onSubmit = async () => {
-    let { name, image } = wallet;
+    let { name, image, currency, isPrivate } = wallet;
     if (!name.trim() || !image) {
       Alert.alert(t("wallet.modal.alertTitle"), t("auth.common.fillFields"));
       return;
@@ -52,7 +61,13 @@ const WalletModal = () => {
       name,
       image,
       uid: user?.uid,
+      currency: currency || "EUR",
+      isPrivate: Boolean(isPrivate),
     };
+
+    if (!oldWallet?.id && user?.uid) {
+      data.ownerIds = [user.uid];
+    }
 
     if (oldWallet?.id) data.id = oldWallet.id;
 
@@ -121,6 +136,17 @@ const WalletModal = () => {
             />
           </View>
           <View style={styles.inputContainer}>
+            <Typo color={colors.text}>{t("wallet.modal.currencyLabel")}</Typo>
+            <Input
+              placeholder="EUR"
+              value={wallet.currency || ""}
+              autoCapitalize="characters"
+              onChangeText={(value) =>
+                setWallet({ ...wallet, currency: value.toUpperCase() })
+              }
+            />
+          </View>
+          <View style={styles.inputContainer}>
             <Typo color={colors.text}>{t("wallet.modal.iconLabel")}</Typo>
             {/* image input */}
             <ImageUpload
@@ -128,6 +154,17 @@ const WalletModal = () => {
               onClear={() => setWallet({ ...wallet, image: null })}
               onSelect={(file) => setWallet({ ...wallet, image: file })}
               placeholder={t("wallet.modal.imagePlaceholder")}
+            />
+          </View>
+          <View style={[styles.inputContainer, styles.switchRow]}>
+            <Typo color={colors.text}>{t("wallet.modal.privateLabel")}</Typo>
+            <Switch
+              value={Boolean(wallet.isPrivate)}
+              onValueChange={(value) =>
+                setWallet({ ...wallet, isPrivate: value })
+              }
+              trackColor={{ false: colors.neutral600, true: colors.primary }}
+              thumbColor={colors.white}
             />
           </View>
         </ScrollView>
@@ -190,5 +227,10 @@ const createStyles = (colors: ThemeColors) =>
     },
     inputContainer: {
       gap: spacingY._10,
+    },
+    switchRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
   });

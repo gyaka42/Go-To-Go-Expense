@@ -18,6 +18,9 @@ export const createOrUpdateWallet = async (
   try {
     let walletToSave = { ...walletData };
 
+    walletToSave.currency = walletToSave.currency ?? "EUR";
+    walletToSave.isPrivate = walletToSave.isPrivate ?? false;
+
     if (walletData.image) {
       const imageUploadRes = await uploadFileToCloudinary(
         walletData.image,
@@ -33,10 +36,25 @@ export const createOrUpdateWallet = async (
     }
 
     if (!walletData?.id) {
+      const ownerIds =
+        walletData.ownerIds ?? (walletData.uid ? [walletData.uid] : []);
+      const memberIds = walletData.memberIds ?? [];
       walletToSave.amount = 0;
       walletToSave.totalIncome = 0;
       walletToSave.totalExpenses = 0;
       walletToSave.created = new Date();
+      walletToSave.createdAt = new Date();
+      walletToSave.ownerIds = ownerIds;
+      walletToSave.memberIds = memberIds;
+      walletToSave.participantIds = Array.from(
+        new Set([...(ownerIds || []), ...(memberIds || [])])
+      );
+    } else if (walletData.ownerIds || walletData.memberIds) {
+      const ownerIds = walletData.ownerIds ?? walletToSave.ownerIds ?? [];
+      const memberIds = walletData.memberIds ?? walletToSave.memberIds ?? [];
+      walletToSave.participantIds = Array.from(
+        new Set([...(ownerIds || []), ...(memberIds || [])])
+      );
     }
 
     const walletRef = walletData?.id

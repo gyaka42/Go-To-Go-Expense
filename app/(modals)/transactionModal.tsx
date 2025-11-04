@@ -15,6 +15,8 @@ import {
   createOrUpdateTransaction,
   deleteTransaction,
 } from "@/services/transactionService";
+import { useRules } from "@/src/rules/useRules";
+import { addTransaction as addSharedTransaction } from "@/src/sharedWallets/firestore";
 import { TransactionType, WalletType } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -41,6 +43,7 @@ import {
   findNodeHandle,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
+import { applyRules } from "./../../src/rules/rulesEngine";
 
 const TransactionModal = () => {
   const router = useRouter();
@@ -55,9 +58,11 @@ const TransactionModal = () => {
     image?: any;
     uid?: string;
     walletId: string;
+    sharedWallet?: string;
   };
 
   const oldTransaction: paramType = useLocalSearchParams();
+  const isSharedWallet = oldTransaction?.sharedWallet === "1";
   const lastTransactionIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -76,7 +81,17 @@ const TransactionModal = () => {
       walletId: oldTransaction.walletId,
       image: oldTransaction?.image ?? null,
     });
+    setCategoryLocked(Boolean(oldTransaction.category));
+    setCategorySuggestion(null);
   }, [oldTransaction]);
+
+  useEffect(() => {
+    if (!oldTransaction?.walletId) return;
+    setTransaction((prev) => ({
+      ...prev,
+      walletId: String(oldTransaction.walletId || ""),
+    }));
+  }, [oldTransaction?.walletId]);
 
   const { t } = useLocalization();
   const { colors, isDarkMode } = useTheme();
@@ -87,6 +102,7 @@ const TransactionModal = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const amountInputRef = useRef<TextInput>(null);
   const descriptionInputRef = useRef<TextInput>(null);
+  const [rules] = useRules();
   const [transaction, setTransaction] = useState<TransactionType>({
     type: "expense",
     amount: 0,
@@ -97,6 +113,11 @@ const TransactionModal = () => {
     image: null,
   });
 
+  const [categorySuggestion, setCategorySuggestion] = useState<string | null>(
+    null
+  );
+  const [categoryLocked, setCategoryLocked] = useState(false);
+
   const constraints = useMemo(() => {
     if (!user?.uid) return [];
     return [where("uid", "==", user.uid), orderBy("created", "desc")];
@@ -105,6 +126,24 @@ const TransactionModal = () => {
   const { data: wallets } = useFetchData<WalletType>("wallets", constraints, [
     user?.uid,
   ]);
+
+  useEffect(() => {
+    if (!transaction.description) {
+      setCategorySuggestion(null);
+      return;
+    }
+    const suggestion = applyRules({ description: transaction.description });
+    setCategorySuggestion(suggestion ?? null);
+    if (
+      suggestion &&
+      !categoryLocked &&
+      (!transaction.category || transaction.category === suggestion)
+    ) {
+      setTransaction((prev) =>
+        prev.category === suggestion ? prev : { ...prev, category: suggestion }
+      );
+    }
+  }, [categoryLocked, transaction.description, transaction.category, rules]);
 
   const transactionTypeOptions = useMemo(
     () =>
@@ -129,6 +168,9 @@ const TransactionModal = () => {
     setTransaction({ ...transaction, date: currentDate });
     setShowDatePicker(Platform.OS === "ios" ? true : false);
   };
+  const handleDescriptionChange = useCallback((value: string) => {
+    setTransaction((prev) => ({ ...prev, description: value }));
+  }, []);
   const onSubmit = async () => {
     const { type, amount, description, category, date, walletId, image } =
       transaction;
@@ -138,6 +180,31 @@ const TransactionModal = () => {
         t("transactionModal.alertTitle"),
         t("auth.common.fillFields")
       );
+      return;
+    }
+
+    if (isSharedWallet && !oldTransaction?.id) {
+      if (!user?.uid) {
+        Alert.alert(t("transactionModal.alertTitle"), t("common.error"));
+        return;
+      }
+      setLoading(true);
+      try {
+        await addSharedTransaction(walletId, {
+          amount,
+          type: type as "income" | "expense",
+          categoryId: category || undefined,
+          description,
+          date,
+          createdBy: user.uid,
+        });
+        setLoading(false);
+        router.back();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setLoading(false);
+        Alert.alert(t("transactionModal.alertTitle"), message);
+      }
       return;
     }
 
@@ -330,8 +397,33 @@ const TransactionModal = () => {
                     ...transaction,
                     category: item.value || "",
                   });
+                  setCategoryLocked(Boolean(item.value));
+                  if (item.value === categorySuggestion) {
+                    setCategorySuggestion(null);
+                  }
                 }}
               />
+              {categorySuggestion &&
+                transaction.category !== categorySuggestion && (
+                  <TouchableOpacity
+                    style={styles.suggestionChip}
+                    onPress={() => {
+                      if (!categorySuggestion) return;
+                      setTransaction({
+                        ...transaction,
+                        category: categorySuggestion,
+                      });
+                      setCategoryLocked(true);
+                      setCategorySuggestion(null);
+                    }}
+                  >
+                    <Typo color={colors.black} fontWeight={"600"}>
+                      {t("transactionModal.categorySuggestion", {
+                        category: getCategoryLabelById(categorySuggestion, t),
+                      })}
+                    </Typo>
+                  </TouchableOpacity>
+                )}
             </View>
           )}
 
@@ -418,12 +510,7 @@ const TransactionModal = () => {
               }}
               inputRef={descriptionInputRef as React.RefObject<TextInput>}
               onFocus={() => scrollToInput(descriptionInputRef)}
-              onChangeText={(value) =>
-                setTransaction({
-                  ...transaction,
-                  description: value,
-                })
-              }
+              onChangeText={handleDescriptionChange}
             />
           </View>
 
@@ -575,4 +662,22 @@ const createStyles = (colors: ThemeColors) =>
       height: verticalScale(30),
       tintColor: colors.neutral400,
     },
+    suggestionChip: {
+      marginTop: spacingY._10,
+      alignSelf: "flex-start",
+      backgroundColor: colors.primaryLight,
+      borderRadius: radius._12,
+      borderCurve: "continuous",
+      paddingHorizontal: spacingX._10,
+      paddingVertical: spacingY._5,
+    },
   });
+type TranslateFn = (key: string, params?: Record<string, unknown>) => string;
+
+function getCategoryLabelById(categoryId: string, t: TranslateFn): string {
+  const category = expenseCategories[categoryId];
+  if (category) {
+    return category.labelKey ? t(category.labelKey) : category.label;
+  }
+  return t("categories.others");
+}

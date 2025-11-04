@@ -1,6 +1,7 @@
 import { AuthProvider } from "@/contexts/authContext";
 import { LocalizationProvider } from "@/contexts/localizationContext";
 import { ThemeProvider } from "@/contexts/themeContext";
+import { AppLockProvider } from "@/src/security/AppLockProvider";
 import { Stack } from "expo-router";
 
 const StackLayout = () => {
@@ -57,7 +58,9 @@ export default function RootLayout() {
     <ThemeProvider>
       <LocalizationProvider>
         <AuthProvider>
-          <StackLayout />
+          <AppLockProvider>
+            <StackLayout />
+          </AppLockProvider>
         </AuthProvider>
       </LocalizationProvider>
     </ThemeProvider>

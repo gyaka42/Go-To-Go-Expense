@@ -6,6 +6,7 @@ import { ThemeColors, radius, spacingX, spacingY } from "@/constants/theme";
 import { LanguageCode } from "@/constants/translations";
 import { useLocalization } from "@/contexts/localizationContext";
 import { useTheme } from "@/contexts/themeContext";
+import { useAppLock } from "@/src/security/AppLockProvider";
 import { scale, verticalScale } from "@/utils/styling";
 import * as Icons from "phosphor-react-native";
 import React from "react";
@@ -28,6 +29,7 @@ const SettingsModal = () => {
   const { language, setLanguage, t } = useLocalization();
 
   const { colors, isDarkMode, setTheme } = useTheme();
+  const { requireLockOnLaunch, setRequireLockOnLaunch } = useAppLock();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   return (
@@ -96,6 +98,28 @@ const SettingsModal = () => {
               <Switch
                 value={isDarkMode}
                 onValueChange={(value) => setTheme(value ? "dark" : "light")}
+                trackColor={{ false: colors.neutral600, true: colors.primary }}
+                thumbColor={colors.white}
+              />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Typo size={18} fontWeight={"600"}>
+              {t("settings.securityTitle")}
+            </Typo>
+            <View style={styles.themeRow}>
+              <View style={{ flex: 1 }}>
+                <Typo size={16} fontWeight={"500"}>
+                  {t("settings.lockOnLaunch")}
+                </Typo>
+                <Typo color={colors.neutral400}>
+                  {t("settings.lockOnLaunchDescription")}
+                </Typo>
+              </View>
+              <Switch
+                value={requireLockOnLaunch}
+                onValueChange={(value) => setRequireLockOnLaunch(value)}
                 trackColor={{ false: colors.neutral600, true: colors.primary }}
                 thumbColor={colors.white}
               />
