@@ -22,15 +22,18 @@ const Wallet = () => {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const constraints = useMemo(() => {
-    if (!user?.uid) return [];
-    return [where("participantIds", "array-contains", user.uid)];
+    if (!user?.uid) return undefined;
+    // Read wallets owned by the current user (matches rules via `uid`)
+    return [where("uid", "==", user.uid)];
   }, [user?.uid]);
 
   const {
     data: wallets,
     loading,
     error,
-  } = useFetchData<WalletType>("wallets", constraints, [user?.uid]);
+  } = useFetchData<WalletType>("wallets", constraints, [user?.uid], {
+    enabled: Boolean(user?.uid),
+  });
 
   const walletList = useMemo(() => {
     const map = new Map<string, WalletType>();

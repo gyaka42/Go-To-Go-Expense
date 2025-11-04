@@ -50,6 +50,35 @@ function omitUndefined<T extends Record<string, unknown>>(value: T): T {
   return next as T;
 }
 
+function toWalletFromFirestore(
+  id: string,
+  data: Partial<Wallet> & { uid?: string; created?: Date | Timestamp | number }
+): Wallet {
+  const ownerIds = Array.isArray(data.ownerIds)
+    ? data.ownerIds
+    : data.uid
+    ? [data.uid]
+    : [];
+  const memberIds = Array.isArray(data.memberIds) ? data.memberIds : [];
+  const participants = Array.isArray(data.participantIds)
+    ? data.participantIds
+    : Array.from(new Set([...ownerIds, ...memberIds]));
+
+  const createdAtValue =
+    (data as any).createdAt ?? data.created ?? Timestamp.fromDate(new Date());
+
+  return {
+    id,
+    name: data.name ?? "",
+    currency: data.currency ?? "EUR",
+    isPrivate: Boolean(data.isPrivate),
+    ownerIds,
+    memberIds,
+    participantIds: participants,
+    createdAt: normalizeTimestamp(createdAtValue),
+  };
+}
+
 async function loadWallet(walletId: string): Promise<Wallet> {
   const walletRef = doc(db, "wallets", walletId);
   const snapshot = await getDoc(walletRef);
@@ -109,6 +138,80 @@ async function logActivity(
     ...activity,
     ts: serverTimestamp(),
   });
+}
+
+/**
+ * Real‑time listener for all wallets visible to a user.
+ * Merges results from multiple queries (owner, member, participant, legacy uid).
+ * No composite index required; sorting happens client‑side.
+ */
+export function listenUserWallets(
+  userId: string,
+  cb: (wallets: Wallet[]) => void
+): Unsubscribe {
+  const walletsCol = collection(db, "wallets");
+
+  const queriesToListen = [
+    query(walletsCol, where("uid", "==", userId)),
+    query(walletsCol, where("ownerIds", "array-contains", userId)),
+    query(walletsCol, where("memberIds", "array-contains", userId)),
+    query(walletsCol, where("participantIds", "array-contains", userId)),
+  ];
+
+  const state = new Map<string, Wallet>();
+  const unsubs = queriesToListen.map((qry) =>
+    onSnapshot(qry, (snap) => {
+      snap.docChanges().forEach((change) => {
+        const id = change.doc.id;
+        if (change.type === "removed") {
+          state.delete(id);
+        } else {
+          const data = change.doc.data() as Partial<Wallet> & {
+            uid?: string;
+            created?: Date | Timestamp | number;
+          };
+          state.set(id, toWalletFromFirestore(id, data));
+        }
+      });
+
+      const list = Array.from(state.values()).sort(
+        (a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()
+      );
+      cb(list);
+    })
+  );
+
+  return () => unsubs.forEach((u) => u());
+}
+
+/**
+ * One‑off fetch for all wallets visible to a user (same merge logic as above).
+ */
+export async function getUserWallets(userId: string): Promise<Wallet[]> {
+  const walletsCol = collection(db, "wallets");
+
+  const queriesToFetch = [
+    query(walletsCol, where("uid", "==", userId)),
+    query(walletsCol, where("ownerIds", "array-contains", userId)),
+    query(walletsCol, where("memberIds", "array-contains", userId)),
+    query(walletsCol, where("participantIds", "array-contains", userId)),
+  ];
+
+  const map = new Map<string, Wallet>();
+  for (const qy of queriesToFetch) {
+    const snap = await getDocs(qy);
+    snap.forEach((docSnap) => {
+      const data = docSnap.data() as Partial<Wallet> & {
+        uid?: string;
+        created?: Date | Timestamp | number;
+      };
+      map.set(docSnap.id, toWalletFromFirestore(docSnap.id, data));
+    });
+  }
+
+  return Array.from(map.values()).sort(
+    (a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()
+  );
 }
 
 export async function inviteMember(

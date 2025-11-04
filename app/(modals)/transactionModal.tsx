@@ -119,13 +119,16 @@ const TransactionModal = () => {
   const [categoryLocked, setCategoryLocked] = useState(false);
 
   const constraints = useMemo(() => {
-    if (!user?.uid) return [];
+    if (!user?.uid) return undefined;
     return [where("uid", "==", user.uid), orderBy("created", "desc")];
   }, [user?.uid]);
 
-  const { data: wallets } = useFetchData<WalletType>("wallets", constraints, [
-    user?.uid,
-  ]);
+  const { data: wallets } = useFetchData<WalletType>(
+    "wallets",
+    constraints,
+    [user?.uid],
+    { enabled: Boolean(user?.uid) }
+  );
 
   useEffect(() => {
     if (!transaction.description) {

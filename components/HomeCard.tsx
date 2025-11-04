@@ -17,14 +17,15 @@ const HomeCard = () => {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const constraints = useMemo(() => {
-    if (!user?.uid) return [];
+    if (!user?.uid) return undefined;
     return [where("uid", "==", user.uid), orderBy("created", "desc")];
   }, [user?.uid]);
 
   const { data: wallets, loading } = useFetchData<WalletType>(
     "wallets",
     constraints,
-    [user?.uid]
+    [user?.uid],
+    { enabled: Boolean(user?.uid) }
   );
 
   const getTotals = () => {

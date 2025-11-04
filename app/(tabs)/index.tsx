@@ -22,14 +22,15 @@ const Home = () => {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
 
-  const constraints = [
-    where("uid", "==", user?.uid),
-    orderBy("date", "desc"),
-    limit(30),
-  ];
+  const constraints = React.useMemo(() => {
+    if (!user?.uid) return undefined;
+    return [where("uid", "==", user.uid), orderBy("date", "desc"), limit(30)];
+  }, [user?.uid]);
 
   const { data: recentTransactions, loading: loadingTransactions } =
-    useFetchData<TransactionType>("transactions", constraints);
+    useFetchData<TransactionType>("transactions", constraints, [user?.uid], {
+      enabled: Boolean(user?.uid),
+    });
 
   return (
     <ScreenWrapper>

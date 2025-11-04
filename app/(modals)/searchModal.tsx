@@ -19,10 +19,15 @@ const SearchModal = () => {
   const { t } = useLocalization();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const constraints = [where("uid", "==", user?.uid), orderBy("date", "desc")];
+  const constraints = React.useMemo(() => {
+    if (!user?.uid) return [];
+    return [where("uid", "==", user.uid), orderBy("date", "desc")];
+  }, [user?.uid]);
 
   const { data: allTransactions, loading: transactionsLoading } =
-    useFetchData<TransactionType>("transactions", constraints);
+    useFetchData<TransactionType>("transactions", constraints, [user?.uid], {
+      enabled: Boolean(user?.uid),
+    });
 
   const filteredTransactions = allTransactions.filter((item) => {
     if (search.length > 1) {
