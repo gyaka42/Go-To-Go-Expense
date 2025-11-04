@@ -137,6 +137,7 @@ export type UserType = {
 export type UserDataType = {
   name: string;
   image?: any;
+  email?: string;
 };
 
 export type AuthContextType = {

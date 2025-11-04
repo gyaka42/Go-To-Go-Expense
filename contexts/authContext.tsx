@@ -1,4 +1,8 @@
 import { auth, firestore } from "@/config/firebase";
+import {
+  normalizeEmail,
+  saveEmailDirectoryEntry,
+} from "@/services/emailDirectory";
 import { AuthContextType, UserType } from "@/types";
 import { useRouter } from "expo-router";
 import {
@@ -63,11 +67,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         email,
         password
       );
+      const normalizedEmail = normalizeEmail(email);
       await setDoc(doc(firestore, "users", response.user.uid), {
         name,
-        email,
+        email: normalizedEmail,
         uid: response.user.uid,
       });
+      await saveEmailDirectoryEntry(response.user.uid, normalizedEmail);
       return { success: true };
     } catch (error: unknown) {
       let msg = error instanceof Error ? error.message : String(error);
@@ -151,6 +157,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           image: data.image || null,
         };
         setUser({ ...userData });
+        try {
+          await saveEmailDirectoryEntry(
+            uid,
+            (data.email as string | undefined | null) ??
+              auth.currentUser?.email ??
+              null
+          );
+        } catch (error) {
+          console.error("Failed to sync email directory entry:", error);
+        }
       }
     } catch (error: unknown) {
       console.error("updateUserData error:", error);

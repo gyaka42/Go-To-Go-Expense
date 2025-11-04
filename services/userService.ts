@@ -1,6 +1,7 @@
 import { firestore } from "@/config/firebase";
 import { ResponseType, UserDataType } from "@/types";
 import { doc, updateDoc } from "firebase/firestore";
+import { saveEmailDirectoryEntry } from "./emailDirectory";
 import { uploadFileToCloudinary } from "./imageService";
 
 export const updateUser = async (
@@ -24,6 +25,9 @@ export const updateUser = async (
 
     const userRef = doc(firestore, "users", uid);
     await updateDoc(userRef, updatedData);
+    if (updatedData.email) {
+      await saveEmailDirectoryEntry(uid, updatedData.email as string);
+    }
 
     return { success: true, msg: "updated successfully" };
   } catch (error: any) {

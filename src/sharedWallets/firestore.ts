@@ -1,3 +1,4 @@
+import { lookupUidByEmail } from "@/services/emailDirectory";
 import { auth, db } from "@/services/firebase";
 import {
   addDoc,
@@ -6,7 +7,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  limit,
   onSnapshot,
   orderBy,
   query,
@@ -115,19 +115,11 @@ async function loadWallet(walletId: string): Promise<Wallet> {
 }
 
 async function resolveUserIdByEmail(email: string): Promise<string> {
-  const usersRef = collection(db, "users");
-  const q = query(
-    usersRef,
-    where("email", "==", email.toLowerCase()),
-    limit(1)
-  );
-  const snapshot = await getDocs(q);
-  if (snapshot.empty) {
+  const uid = await lookupUidByEmail(email);
+  if (!uid) {
     throw new Error("Geen gebruiker gevonden voor dit e-mailadres");
   }
-  const userDoc = snapshot.docs[0];
-  const data = userDoc.data() as { uid?: string };
-  return data.uid ?? userDoc.id;
+  return uid;
 }
 
 async function logActivity(
