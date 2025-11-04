@@ -1,15 +1,7 @@
 import { firestore } from "@/config/firebase";
-import {
-  collection,
-  doc,
-  getDocs,
-  limit,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
-const COLLECTION_NAME = "userEmailDirectory";
+const COLLECTION_NAME = "emailDirectory";
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -24,7 +16,7 @@ export async function saveEmailDirectoryEntry(
   }
 
   const normalized = normalizeEmail(email);
-  const ref = doc(firestore, COLLECTION_NAME, uid);
+  const ref = doc(firestore, COLLECTION_NAME, normalized);
 
   await setDoc(
     ref,
@@ -42,21 +34,15 @@ export async function lookupUidByEmail(email: string): Promise<string | null> {
     return null;
   }
 
-  const directoryRef = collection(firestore, COLLECTION_NAME);
-  const searchQuery = query(
-    directoryRef,
-    where("email", "==", normalized),
-    limit(1)
-  );
-  const snapshot = await getDocs(searchQuery);
+  const directoryRef = doc(firestore, COLLECTION_NAME, normalized);
+  const snapshot = await getDoc(directoryRef);
 
-  if (snapshot.empty) {
+  if (!snapshot.exists()) {
     return null;
   }
 
-  const docSnap = snapshot.docs[0];
-  const data = docSnap.data() as { uid?: string | null };
-  return data.uid ?? docSnap.id ?? null;
+  const data = snapshot.data() as { uid?: string | null };
+  return data.uid ?? snapshot.id ?? null;
 }
 
 export { normalizeEmail };
