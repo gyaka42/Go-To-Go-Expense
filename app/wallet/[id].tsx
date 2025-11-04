@@ -252,7 +252,7 @@ const WalletDetailScreen = () => {
         </View>
       </View>
     ),
-    [actionLoading, colors, handleApprove, handleReject, styles]
+    [actionLoading, colors, handleApprove, handleReject, styles, t]
   );
 
   const renderActivity = useCallback(

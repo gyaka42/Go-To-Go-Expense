@@ -10,7 +10,7 @@ import useFetchData from "@/hooks/useFetchData";
 import { WalletType } from "@/types";
 import { verticalScale } from "@/utils/styling";
 import { useRouter } from "expo-router";
-import { or, where } from "firebase/firestore";
+import { where } from "firebase/firestore";
 import * as Icons from "phosphor-react-native";
 import React, { useMemo } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -23,13 +23,7 @@ const Wallet = () => {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const constraints = useMemo(() => {
     if (!user?.uid) return [];
-    return [
-      or(
-        where("uid", "==", user.uid),
-        where("ownerIds", "array-contains", user.uid),
-        where("participantIds", "array-contains", user.uid)
-      ),
-    ];
+    return [where("participantIds", "array-contains", user.uid)];
   }, [user?.uid]);
 
   const {

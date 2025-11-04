@@ -25,10 +25,7 @@ const WalletListItem = ({
   const { t } = useLocalization();
   const openWallet = () => {
     if (!item?.id) return;
-    router.push({
-      pathname: "/wallet/[id]",
-      params: { id: item.id },
-    });
+    router.push(`/wallet/${item.id}`);
   };
 
   const openEdit = () => {

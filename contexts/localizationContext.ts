@@ -16,10 +16,12 @@ import React, {
 
 const STORAGE_KEY = "app_language";
 
+type TranslationParams = Record<string, string | number>;
+
 type LocalizationContextType = {
   language: LanguageCode;
   setLanguage: (language: LanguageCode) => Promise<void>;
-  t: (key: string) => string;
+  t: (key: string, params?: TranslationParams) => string;
 };
 
 const LocalizationContext = createContext<LocalizationContextType | null>(null);
@@ -58,13 +60,17 @@ export const LocalizationProvider = ({
   }, []);
 
   const translate = useCallback(
-    (key: string) => {
+    (key: string, params?: TranslationParams) => {
       const current = translations[language] ?? translations[DEFAULT_LANGUAGE];
-      if (current[key]) return current[key];
-      if (translations[DEFAULT_LANGUAGE][key]) {
-        return translations[DEFAULT_LANGUAGE][key];
-      }
-      return key;
+      const template =
+        current[key] ?? translations[DEFAULT_LANGUAGE][key] ?? key;
+
+      if (!params) return template;
+
+      return Object.entries(params).reduce((acc, [paramKey, value]) => {
+        const pattern = new RegExp(`\\{\\{${paramKey}\\}}`, "g");
+        return acc.replace(pattern, String(value));
+      }, template);
     },
     [language]
   );

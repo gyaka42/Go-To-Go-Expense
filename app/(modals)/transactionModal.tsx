@@ -21,7 +21,7 @@ import { TransactionType, WalletType } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { orderBy, where } from "firebase/firestore";
+import { Timestamp, orderBy, where } from "firebase/firestore";
 import * as Icons from "phosphor-react-native";
 import React, {
   useCallback,
@@ -190,12 +190,16 @@ const TransactionModal = () => {
       }
       setLoading(true);
       try {
+        const dateValue =
+          date instanceof Date || date instanceof Timestamp
+            ? date
+            : new Date(date);
         await addSharedTransaction(walletId, {
           amount,
           type: type as "income" | "expense",
           categoryId: category || undefined,
           description,
-          date,
+          date: dateValue,
           createdBy: user.uid,
         });
         setLoading(false);
@@ -672,7 +676,10 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: spacingY._5,
     },
   });
-type TranslateFn = (key: string, params?: Record<string, unknown>) => string;
+type TranslateFn = (
+  key: string,
+  params?: Record<string, string | number>
+) => string;
 
 function getCategoryLabelById(categoryId: string, t: TranslateFn): string {
   const category = expenseCategories[categoryId];
