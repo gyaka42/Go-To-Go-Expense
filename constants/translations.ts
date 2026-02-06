@@ -158,6 +158,7 @@ export const translations: TranslationMap = {
     "sharedWallet.transactionsEmpty": "Nog geen transacties.",
     "sharedWallet.activityTitle": "Activiteit",
     "sharedWallet.activityEmpty": "Nog geen activiteit.",
+    "sharedWallet.activityAlert": "ALERT",
     "sharedWallet.inviteButton": "Lid uitnodigen",
     "sharedWallet.inviteDescription":
       "Voer het e-mailadres van het nieuwe lid in.",
@@ -327,6 +328,7 @@ export const translations: TranslationMap = {
     "sharedWallet.transactionsEmpty": "Henüz işlem yok.",
     "sharedWallet.activityTitle": "Aktivite",
     "sharedWallet.activityEmpty": "Henüz aktivite yok.",
+    "sharedWallet.activityAlert": "UYARI",
     "sharedWallet.inviteButton": "Üye davet et",
     "sharedWallet.inviteDescription": "Yeni üyenin e-postasını gir.",
     "sharedWallet.inviteSubmit": "Davet et",
@@ -496,6 +498,7 @@ export const translations: TranslationMap = {
     "sharedWallet.transactionsEmpty": "No transactions yet.",
     "sharedWallet.activityTitle": "Activity",
     "sharedWallet.activityEmpty": "No activity yet.",
+    "sharedWallet.activityAlert": "ALERT",
     "sharedWallet.inviteButton": "Invite member",
     "sharedWallet.inviteDescription":
       "Enter the email address of the member you want to invite.",
@@ -666,6 +669,7 @@ export const translations: TranslationMap = {
     "sharedWallet.transactionsEmpty": "Noch keine Transaktionen.",
     "sharedWallet.activityTitle": "Aktivitäten",
     "sharedWallet.activityEmpty": "Noch keine Aktivitäten.",
+    "sharedWallet.activityAlert": "ALARM",
     "sharedWallet.inviteButton": "Mitglied einladen",
     "sharedWallet.inviteDescription":
       "Gib die E-Mail-Adresse des neuen Mitglieds ein.",

@@ -2,8 +2,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
 import { DEFAULT_RULES } from "./defaultRules";
 import { Rule, setActiveRules, sortRules } from "./rulesEngine";
+import { firestore } from "@/config/firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "@/contexts/authContext";
 
 const STORAGE_KEY = "rules/user-defined";
+const RULES_DOC_ID = "settings";
 
 export type UseRulesActions = {
   addRule: (rule: Rule) => Promise<void>;
@@ -13,12 +17,35 @@ export type UseRulesActions = {
 };
 
 export function useRules(): [Rule[], UseRulesActions] {
+  const { user } = useAuth();
   const [rules, setRules] = useState<Rule[]>(sortRules(DEFAULT_RULES));
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     const loadRules = async () => {
       try {
+        if (user?.uid) {
+          const remoteRef = doc(
+            firestore,
+            "users",
+            user.uid,
+            "rules",
+            RULES_DOC_ID
+          );
+          const remoteSnap = await getDoc(remoteRef);
+          if (remoteSnap.exists()) {
+            const data = remoteSnap.data() as { rules?: Rule[] };
+            if (Array.isArray(data.rules)) {
+              const sorted = sortRules(data.rules);
+              setRules(sorted);
+              setActiveRules(sorted);
+              setIsHydrated(true);
+              await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(sorted));
+              return;
+            }
+          }
+        }
+
         const storedValue = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedValue) {
           const parsed: Rule[] = JSON.parse(storedValue);
@@ -27,6 +54,20 @@ export function useRules(): [Rule[], UseRulesActions] {
             setRules(sorted);
             setActiveRules(sorted);
             setIsHydrated(true);
+            if (user?.uid) {
+              const remoteRef = doc(
+                firestore,
+                "users",
+                user.uid,
+                "rules",
+                RULES_DOC_ID
+              );
+              await setDoc(
+                remoteRef,
+                { rules: sorted, updatedAt: serverTimestamp() },
+                { merge: true }
+              );
+            }
             return;
           }
         }
@@ -41,7 +82,7 @@ export function useRules(): [Rule[], UseRulesActions] {
     };
 
     loadRules();
-  }, []);
+  }, [user?.uid]);
 
   const persistRules = useCallback(async (nextRules: Rule[]) => {
     const sorted = sortRules(nextRules);
@@ -49,10 +90,24 @@ export function useRules(): [Rule[], UseRulesActions] {
     setActiveRules(sorted);
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(sorted));
+      if (user?.uid) {
+        const remoteRef = doc(
+          firestore,
+          "users",
+          user.uid,
+          "rules",
+          RULES_DOC_ID
+        );
+        await setDoc(
+          remoteRef,
+          { rules: sorted, updatedAt: serverTimestamp() },
+          { merge: true }
+        );
+      }
     } catch (error) {
       console.warn("Failed to persist rules", error);
     }
-  }, []);
+  }, [user?.uid]);
 
   const addRule = useCallback<UseRulesActions["addRule"]>(
     async (rule) => {
@@ -92,10 +147,24 @@ export function useRules(): [Rule[], UseRulesActions] {
     setActiveRules(defaults);
     try {
       await AsyncStorage.removeItem(STORAGE_KEY);
+      if (user?.uid) {
+        const remoteRef = doc(
+          firestore,
+          "users",
+          user.uid,
+          "rules",
+          RULES_DOC_ID
+        );
+        await setDoc(
+          remoteRef,
+          { rules: defaults, updatedAt: serverTimestamp() },
+          { merge: true }
+        );
+      }
     } catch (error) {
       console.warn("Failed to clear stored rules", error);
     }
-  }, []);
+  }, [user?.uid]);
 
   useEffect(() => {
     if (!isHydrated) return;

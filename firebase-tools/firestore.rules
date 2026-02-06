@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function walletDoc(walletId) {
+      return get(/databases/$(database)/documents/wallets/$(walletId));
+    }
+
+    function walletHasUid(walletId, uid) {
+      return uid != null && (
+        uid in walletDoc(walletId).data.ownerIds ||
+        uid in walletDoc(walletId).data.memberIds ||
+        uid in walletDoc(walletId).data.participantIds ||
+        walletDoc(walletId).data.uid == uid
+      );
+    }
+
+    function isWalletOwner(walletId, uid) {
+      return uid != null && (
+        uid in walletDoc(walletId).data.ownerIds ||
+        walletDoc(walletId).data.uid == uid
+      );
+    }
+
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+    
+    match /users/{userId}/rules/{ruleDocId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /wallets/{walletId} {
+      allow read: if isSignedIn() && walletHasUid(walletId, request.auth.uid);
+
+      allow create: if isSignedIn();
+
+      allow update: if isSignedIn() && isWalletOwner(walletId, request.auth.uid);
+
+      allow delete: if isSignedIn() && isWalletOwner(walletId, request.auth.uid);
+
+      match /transactions/{transactionId} {
+        allow read: if isSignedIn() && walletHasUid(walletId, request.auth.uid);
+
+        allow create: if isSignedIn() && walletHasUid(walletId, request.auth.uid);
+
+        allow update: if isSignedIn() && isWalletOwner(walletId, request.auth.uid);
+
+        allow delete: if isSignedIn() && isWalletOwner(walletId, request.auth.uid);
+      }
+
+      match /activity/{activityId} {
+        allow read: if isSignedIn() && walletHasUid(walletId, request.auth.uid);
+        allow create: if isSignedIn() && walletHasUid(walletId, request.auth.uid);
+        allow update, delete: if false;
+      }
+    }
+
+    match /emailDirectory/{emailKey} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+    }
+  }
+}

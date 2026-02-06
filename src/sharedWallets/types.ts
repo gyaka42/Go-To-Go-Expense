@@ -39,6 +39,7 @@ export type ActivityType =
   | "transaction_created"
   | "transaction_approved"
   | "transaction_rejected"
+  | "transaction_large"
   | "member_invited"
   | "member_joined";
 

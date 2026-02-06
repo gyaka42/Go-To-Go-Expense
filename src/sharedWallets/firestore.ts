@@ -1,23 +1,23 @@
 import { lookupUidByEmail } from "@/services/emailDirectory";
 import { auth, db } from "@/services/firebase";
 import {
-  addDoc,
   arrayUnion,
   collection,
   doc,
   getDoc,
   getDocs,
+  writeBatch,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
-  setDoc,
   Timestamp,
   Unsubscribe,
-  updateDoc,
   where,
 } from "firebase/firestore";
 import { Activity, NewTxn, Transaction, Wallet } from "./types";
+
+const LARGE_TRANSACTION_THRESHOLD = 1000;
 
 const activityCollection = (walletId: string) =>
   collection(db, "wallets", walletId, "activity");
@@ -122,11 +122,13 @@ async function resolveUserIdByEmail(email: string): Promise<string> {
   return uid;
 }
 
-async function logActivity(
+function queueActivity(
+  batch: ReturnType<typeof writeBatch>,
   walletId: string,
   activity: Omit<Activity, "id" | "ts">
 ) {
-  await addDoc(activityCollection(walletId), {
+  const activityRef = doc(activityCollection(walletId));
+  batch.set(activityRef, {
     ...activity,
     ts: serverTimestamp(),
   });
@@ -217,18 +219,24 @@ export async function inviteMember(
     throw new Error("Gebruiker is al lid van deze wallet");
   }
 
+  const currentUser = currentUserId();
+  if (!currentUser || !wallet.ownerIds.includes(currentUser)) {
+    throw new Error("Alleen de eigenaar kan leden uitnodigen");
+  }
+
   const walletRef = doc(db, "wallets", walletId);
-  await updateDoc(walletRef, {
+  const batch = writeBatch(db);
+  batch.update(walletRef, {
     memberIds: arrayUnion(userId),
     participantIds: arrayUnion(userId),
   });
-
-  await logActivity(walletId, {
+  queueActivity(batch, walletId, {
     type: "member_invited",
-    actorId: currentUserId() ?? "system",
+    actorId: currentUser,
     targetId: userId,
     message: `Uitnodiging verstuurd naar ${email}`,
   });
+  await batch.commit();
 }
 
 export async function addTransaction(
@@ -238,6 +246,13 @@ export async function addTransaction(
   const wallet = await loadWallet(walletId);
   const ref = doc(transactionsCollection(walletId));
   const isOwner = wallet.ownerIds.includes(txn.createdBy);
+  const isParticipant =
+    wallet.ownerIds.includes(txn.createdBy) ||
+    wallet.memberIds.includes(txn.createdBy) ||
+    (wallet.participantIds ?? []).includes(txn.createdBy);
+  if (!isParticipant) {
+    throw new Error("Gebruiker is geen lid van deze wallet");
+  }
   const status = isOwner ? "approved" : "pending";
   const now = serverTimestamp();
   const payload = omitUndefined({
@@ -253,9 +268,9 @@ export async function addTransaction(
     createdAt: now,
   });
 
-  await setDoc(ref, payload);
-
-  await logActivity(walletId, {
+  const batch = writeBatch(db);
+  batch.set(ref, payload);
+  queueActivity(batch, walletId, {
     type: "transaction_created",
     actorId: txn.createdBy,
     targetId: ref.id,
@@ -266,13 +281,24 @@ export async function addTransaction(
   });
 
   if (status === "approved") {
-    await logActivity(walletId, {
+    queueActivity(batch, walletId, {
       type: "transaction_approved",
       actorId: txn.createdBy,
       targetId: ref.id,
       message: "Transactie automatisch goedgekeurd",
     });
   }
+
+  if (Math.abs(txn.amount) >= LARGE_TRANSACTION_THRESHOLD) {
+    queueActivity(batch, walletId, {
+      type: "transaction_large",
+      actorId: txn.createdBy,
+      targetId: ref.id,
+      message: `Grote transactie: ${txn.amount} ${wallet.currency}`,
+    });
+  }
+
+  await batch.commit();
 
   return ref.id;
 }
@@ -282,19 +308,32 @@ export async function approveTransaction(
   txnId: string,
   approverId: string
 ): Promise<void> {
+  const wallet = await loadWallet(walletId);
+  if (!wallet.ownerIds.includes(approverId)) {
+    throw new Error("Alleen de eigenaar kan transacties goedkeuren");
+  }
   const transactionRef = doc(db, "wallets", walletId, "transactions", txnId);
-  await updateDoc(transactionRef, {
+  const currentSnap = await getDoc(transactionRef);
+  if (!currentSnap.exists()) {
+    throw new Error("Transactie niet gevonden");
+  }
+  const currentData = currentSnap.data() as Partial<Transaction>;
+  if (currentData.status && currentData.status !== "pending") {
+    throw new Error("Transactie is al verwerkt");
+  }
+  const batch = writeBatch(db);
+  batch.update(transactionRef, {
     status: "approved",
     approvedBy: approverId,
     approvedAt: serverTimestamp(),
   });
-
-  await logActivity(walletId, {
+  queueActivity(batch, walletId, {
     type: "transaction_approved",
     actorId: approverId,
     targetId: txnId,
     message: "Transactie goedgekeurd",
   });
+  await batch.commit();
 }
 
 export async function rejectTransaction(
@@ -302,19 +341,32 @@ export async function rejectTransaction(
   txnId: string,
   approverId: string
 ): Promise<void> {
+  const wallet = await loadWallet(walletId);
+  if (!wallet.ownerIds.includes(approverId)) {
+    throw new Error("Alleen de eigenaar kan transacties afwijzen");
+  }
   const transactionRef = doc(db, "wallets", walletId, "transactions", txnId);
-  await updateDoc(transactionRef, {
+  const currentSnap = await getDoc(transactionRef);
+  if (!currentSnap.exists()) {
+    throw new Error("Transactie niet gevonden");
+  }
+  const currentData = currentSnap.data() as Partial<Transaction>;
+  if (currentData.status && currentData.status !== "pending") {
+    throw new Error("Transactie is al verwerkt");
+  }
+  const batch = writeBatch(db);
+  batch.update(transactionRef, {
     status: "rejected",
     approvedBy: approverId,
     approvedAt: serverTimestamp(),
   });
-
-  await logActivity(walletId, {
+  queueActivity(batch, walletId, {
     type: "transaction_rejected",
     actorId: approverId,
     targetId: txnId,
     message: "Transactie afgewezen",
   });
+  await batch.commit();
 }
 
 export function listenWallet(

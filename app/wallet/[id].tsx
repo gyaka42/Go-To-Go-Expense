@@ -256,15 +256,27 @@ const WalletDetailScreen = () => {
   );
 
   const renderActivity = useCallback(
-    (event: Activity) => (
-      <View key={event.id} style={styles.activityItem}>
-        <Typo fontWeight={"500"}>{event.message}</Typo>
-        <Typo size={11} color={colors.neutral400}>
-          {formatDate(event.ts)}
-        </Typo>
-      </View>
-    ),
-    [colors.neutral400, styles.activityItem]
+    (event: Activity) => {
+      const isAlert = event.type === "transaction_large";
+      return (
+        <View key={event.id} style={styles.activityItem}>
+          <View style={styles.activityHeader}>
+            <Typo fontWeight={"500"}>{event.message}</Typo>
+            {isAlert ? (
+              <View style={styles.alertBadge}>
+                <Typo size={10} color={colors.white}>
+                  {t("sharedWallet.activityAlert")}
+                </Typo>
+              </View>
+            ) : null}
+          </View>
+          <Typo size={11} color={colors.neutral400}>
+            {formatDate(event.ts)}
+          </Typo>
+        </View>
+      );
+    },
+    [colors.neutral400, colors.white, styles, t]
   );
 
   const currency = wallet?.currency ?? "EUR";
@@ -598,6 +610,19 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.borderColor,
       gap: spacingY._5,
+    },
+    activityHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: spacingX._10,
+    },
+    alertBadge: {
+      backgroundColor: colors.rose,
+      borderRadius: radius._6,
+      borderCurve: "continuous",
+      paddingHorizontal: spacingX._7,
+      paddingVertical: 2,
     },
     lockedContainer: {
       flex: 1,

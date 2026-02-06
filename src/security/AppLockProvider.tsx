@@ -33,14 +33,13 @@ type WalletUnlockState = Record<string, boolean>;
 
 const defaultPromptMessage = "Ontgrendel de app";
 const walletPromptMessage = "Ontgrendel wallet";
+const authUnavailableMessage =
+  "Schakel Face ID/Touch ID of apparaatcode in om toegang te krijgen.";
 
-async function supportsBiometrics() {
+async function supportsDeviceAuth() {
   try {
-    const [isSupported, isEnrolled] = await Promise.all([
-      LocalAuthentication.hasHardwareAsync(),
-      LocalAuthentication.isEnrolledAsync(),
-    ]);
-    return isSupported && isEnrolled;
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    return isEnrolled;
   } catch (error) {
     console.warn("Failed to determine biometric support", error);
     return false;
@@ -54,16 +53,18 @@ export const AppLockProvider: React.FC<{ children: React.ReactNode }> = ({
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isAuthAvailable, setIsAuthAvailable] = useState(true);
   const [requireLockOnLaunch, setRequireLockOnLaunchState] =
     useState<boolean>(true);
   const walletUnlocks = useRef<WalletUnlockState>({});
   const hasAttemptedInitialUnlock = useRef(false);
 
   const runAuthentication = useCallback(async (promptMessage: string) => {
-    const biometricAvailable = await supportsBiometrics();
-    if (!biometricAvailable) {
-      setIsUnlocked(true);
-      return true;
+    const authAvailable = await supportsDeviceAuth();
+    setIsAuthAvailable(authAvailable);
+    if (!authAvailable) {
+      setIsUnlocked(false);
+      return false;
     }
 
     setIsAuthenticating(true);
@@ -167,6 +168,14 @@ export const AppLockProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [ensureUnlocked, requireLockOnLaunch]);
 
   useEffect(() => {
+    const checkAuthAvailability = async () => {
+      const available = await supportsDeviceAuth();
+      setIsAuthAvailable(available);
+    };
+    checkAuthAvailability();
+  }, []);
+
+  useEffect(() => {
     const handleAppStateChange = async (nextState: AppStateStatus) => {
       if (nextState === "active") {
         if (requireLockOnLaunch) {
@@ -213,7 +222,9 @@ export const AppLockProvider: React.FC<{ children: React.ReactNode }> = ({
                 {"Vergrendeld"}
               </Typo>
               <Typo color={colors.white} style={styles.overlayDescription}>
-                {"Gebruik Face ID/Touch ID om toegang te krijgen."}
+                {isAuthAvailable
+                  ? "Gebruik Face ID/Touch ID om toegang te krijgen."
+                  : authUnavailableMessage}
               </Typo>
               <View style={styles.loader}>
                 {isAuthenticating ? <Loading /> : null}
