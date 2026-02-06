@@ -45,7 +45,7 @@
     "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-gifted-charts": "^1.4.64",
-    "react-native-reanimated": "~4.1.1",
+    "react-native-reanimated": "4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
     "react-native-web": "^0.21.0"
@@ -56,6 +56,9 @@
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"
+  },
+  "overrides": {
+    "react-native-worklets": "0.5.1"
   },
   "private": true
 }
