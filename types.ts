@@ -180,7 +180,6 @@ export type WalletType = {
   created?: Date;
   createdAt?: Date;
   currency?: string;
-  isPrivate?: boolean;
   ownerIds?: string[];
   memberIds?: string[];
   participantIds?: string[];

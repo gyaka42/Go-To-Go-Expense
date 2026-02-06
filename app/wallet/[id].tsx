@@ -9,7 +9,6 @@ import { expenseCategories, incomeCategory } from "@/constants/data";
 import { ThemeColors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useLocalization } from "@/contexts/localizationContext";
 import { useTheme } from "@/contexts/themeContext";
-import { useAppLock } from "@/src/security/AppLockProvider";
 import { useSharedWallet } from "@/src/sharedWallets/useSharedWallet";
 import { verticalScale } from "@/utils/styling";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -46,57 +45,10 @@ const WalletDetailScreen = () => {
     isOwner,
     isMember,
   } = useSharedWallet(walletId);
-  const { requireWalletUnlock } = useAppLock();
-
-  const [walletUnlocked, setWalletUnlocked] = useState(false);
-  const [isUnlocking, setIsUnlocking] = useState(false);
   const [inviteVisible, setInviteVisible] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [submittingInvite, setSubmittingInvite] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-
-  useEffect(() => {
-    setWalletUnlocked(false);
-  }, [walletId]);
-
-  useEffect(() => {
-    if (!wallet) return;
-    if (!wallet.isPrivate) {
-      setWalletUnlocked(true);
-      setIsUnlocking(false);
-      return;
-    }
-    if (walletUnlocked) return;
-    let isActive = true;
-    setIsUnlocking(true);
-    requireWalletUnlock(wallet.id)
-      .then((unlocked) => {
-        if (isActive) {
-          setWalletUnlocked(unlocked);
-        }
-      })
-      .finally(() => {
-        if (isActive) {
-          setIsUnlocking(false);
-        }
-      });
-
-    return () => {
-      isActive = false;
-    };
-  }, [wallet, walletUnlocked, requireWalletUnlock]);
-
-  const handleRetryUnlock = useCallback(() => {
-    if (!wallet?.id) return;
-    setIsUnlocking(true);
-    requireWalletUnlock(wallet.id)
-      .then((unlocked) => {
-        setWalletUnlocked(unlocked);
-      })
-      .finally(() => {
-        setIsUnlocking(false);
-      });
-  }, [wallet?.id, requireWalletUnlock]);
 
   const historyTransactions = useMemo(() => {
     return transactions
@@ -283,8 +235,6 @@ const WalletDetailScreen = () => {
   const memberCount = wallet?.memberIds?.length ?? 0;
   const ownerCount = wallet?.ownerIds?.length ?? 0;
 
-  const showLockedState = wallet?.isPrivate && !walletUnlocked;
-
   return (
     <ScreenWrapper style={{ backgroundColor: colors.cardBackground }}>
       <View style={styles.container}>
@@ -295,23 +245,9 @@ const WalletDetailScreen = () => {
 
         {error ? <Typo color={colors.rose}>{error}</Typo> : null}
 
-        {loading || isUnlocking ? (
+        {loading ? (
           <View style={styles.centered}>
             <Loading />
-          </View>
-        ) : showLockedState ? (
-          <View style={styles.lockedContainer}>
-            <Typo size={20} fontWeight={"600"}>
-              {t("sharedWallet.lockedTitle")}
-            </Typo>
-            <Typo color={colors.neutral400} style={{ textAlign: "center" }}>
-              {t("sharedWallet.lockedDescription")}
-            </Typo>
-            <Button style={styles.lockedButton} onPress={handleRetryUnlock}>
-              <Typo color={colors.black} fontWeight={"600"}>
-                {t("sharedWallet.retryUnlock")}
-              </Typo>
-            </Button>
           </View>
         ) : !isMember ? (
           <View style={styles.centered}>
@@ -623,16 +559,6 @@ const createStyles = (colors: ThemeColors) =>
       borderCurve: "continuous",
       paddingHorizontal: spacingX._7,
       paddingVertical: 2,
-    },
-    lockedContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      gap: spacingY._15,
-      paddingHorizontal: spacingX._20,
-    },
-    lockedButton: {
-      width: verticalScale(180),
     },
     modalBackdrop: {
       flex: 1,

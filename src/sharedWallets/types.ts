@@ -4,7 +4,6 @@ export type Wallet = {
   id: string;
   name: string;
   currency: string;
-  isPrivate: boolean;
   ownerIds: string[];
   memberIds: string[];
   participantIds?: string[];

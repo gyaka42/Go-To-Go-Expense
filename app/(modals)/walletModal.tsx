@@ -15,7 +15,7 @@ import { scale, verticalScale } from "@/utils/styling";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Icons from "phosphor-react-native";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Switch, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 
 const WalletModal = () => {
   const router = useRouter();
@@ -24,7 +24,6 @@ const WalletModal = () => {
     name: string;
     image: string;
     id: string;
-    isPrivate?: string;
     currency?: string;
   } = useLocalSearchParams();
   useEffect(() => {
@@ -33,7 +32,6 @@ const WalletModal = () => {
         name: oldWallet?.name,
         image: oldWallet?.image,
         currency: oldWallet?.currency || "EUR",
-        isPrivate: oldWallet?.isPrivate === "1",
       });
     }
   }, []);
@@ -47,22 +45,20 @@ const WalletModal = () => {
     name: "",
     image: null,
     currency: "EUR",
-    isPrivate: false,
   });
 
   const onSubmit = async () => {
-    let { name, image, currency, isPrivate } = wallet;
-    if (!name.trim() || !image) {
+    let { name, image, currency } = wallet;
+    if (!name.trim()) {
       Alert.alert(t("wallet.modal.alertTitle"), t("auth.common.fillFields"));
       return;
     }
 
     const data: WalletType = {
       name,
-      image,
+      image: image ?? null,
       uid: user?.uid,
       currency: currency || "EUR",
-      isPrivate: Boolean(isPrivate),
     };
 
     if (!oldWallet?.id && user?.uid) {
@@ -156,17 +152,6 @@ const WalletModal = () => {
               placeholder={t("wallet.modal.imagePlaceholder")}
             />
           </View>
-          <View style={[styles.inputContainer, styles.switchRow]}>
-            <Typo color={colors.text}>{t("wallet.modal.privateLabel")}</Typo>
-            <Switch
-              value={Boolean(wallet.isPrivate)}
-              onValueChange={(value) =>
-                setWallet({ ...wallet, isPrivate: value })
-              }
-              trackColor={{ false: colors.neutral600, true: colors.primary }}
-              thumbColor={colors.white}
-            />
-          </View>
         </ScrollView>
       </View>
 
@@ -227,10 +212,5 @@ const createStyles = (colors: ThemeColors) =>
     },
     inputContainer: {
       gap: spacingY._10,
-    },
-    switchRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
     },
   });

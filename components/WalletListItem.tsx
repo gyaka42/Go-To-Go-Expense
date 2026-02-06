@@ -35,7 +35,6 @@ const WalletListItem = ({
         id: item?.id,
         name: item?.name,
         image: item?.image,
-        isPrivate: item?.isPrivate ? "1" : "0",
         currency: item?.currency,
       },
     });
@@ -60,13 +59,6 @@ const WalletListItem = ({
           <Typo size={14} color={colors.neutral400}>
             € {item?.amount},-
           </Typo>
-          {item?.isPrivate ? (
-            <View style={styles.badge}>
-              <Typo size={11} color={colors.black}>
-                {t("wallet.privateBadge")}
-              </Typo>
-            </View>
-          ) : null}
         </View>
         <View style={styles.actionIcons}>
           <TouchableOpacity onPress={openEdit} style={styles.editButton}>

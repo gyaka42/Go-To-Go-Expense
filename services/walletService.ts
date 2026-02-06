@@ -19,7 +19,6 @@ export const createOrUpdateWallet = async (
     let walletToSave = { ...walletData };
 
     walletToSave.currency = walletToSave.currency ?? "EUR";
-    walletToSave.isPrivate = walletToSave.isPrivate ?? false;
 
     if (walletData.image) {
       const imageUploadRes = await uploadFileToCloudinary(
