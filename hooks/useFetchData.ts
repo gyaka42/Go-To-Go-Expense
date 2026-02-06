@@ -64,6 +64,7 @@ const useFetchData = <T>(
     // If constraints aren't ready yet (e.g., no uid), don't subscribe yet
     if (skipIfEmptyConstraints && (!constraints || constraints.length === 0)) {
       resetState();
+      return;
     }
 
     setLoading(true);
