@@ -15,9 +15,10 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { AppState, AppStateStatus, StyleSheet, View } from "react-native";
+import { AppState, AppStateStatus, Platform, StyleSheet, View } from "react-native";
 
 const STORAGE_KEY = "app-lock/require-on-launch";
+const DEV_BYPASS_LOCK = __DEV__;
 
 type AppLockContextValue = {
   isUnlocked: boolean;
@@ -55,11 +56,15 @@ export const AppLockProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isAuthAvailable, setIsAuthAvailable] = useState(true);
   const [requireLockOnLaunch, setRequireLockOnLaunchState] =
-    useState<boolean>(true);
+    useState<boolean>(!DEV_BYPASS_LOCK);
   const walletUnlocks = useRef<WalletUnlockState>({});
   const hasAttemptedInitialUnlock = useRef(false);
 
   const runAuthentication = useCallback(async (promptMessage: string) => {
+    if (DEV_BYPASS_LOCK) {
+      setIsUnlocked(true);
+      return true;
+    }
     const authAvailable = await supportsDeviceAuth();
     setIsAuthAvailable(authAvailable);
     if (!authAvailable) {
@@ -140,6 +145,12 @@ export const AppLockProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const loadPreference = async () => {
       try {
+        if (DEV_BYPASS_LOCK) {
+          setRequireLockOnLaunchState(false);
+          setIsUnlocked(true);
+          hasAttemptedInitialUnlock.current = true;
+          return;
+        }
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
         if (raw != null) {
           const parsed = JSON.parse(raw);

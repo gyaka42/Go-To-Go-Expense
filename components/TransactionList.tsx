@@ -18,13 +18,18 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import Loading from "./Loading";
 import Typo from "./Typo";
 
+type TransactionListProps = TransactionListType & {
+  bottomPadding?: number;
+};
+
 const TransactionList = ({
   data,
   title,
   loading,
   emptyListMessage,
   showTopFade = true,
-}: TransactionListType) => {
+  bottomPadding = spacingY._20,
+}: TransactionListProps) => {
   const router = useRouter();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -64,7 +69,7 @@ const TransactionList = ({
             />
           )}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: bottomPadding }]}
         />
         {showTopFade && (
           <LinearGradient

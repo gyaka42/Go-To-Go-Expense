@@ -9,6 +9,7 @@ import { useTheme } from "@/contexts/themeContext";
 import useFetchData from "@/hooks/useFetchData";
 import { TransactionType } from "@/types";
 import { verticalScale } from "@/utils/styling";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useRouter } from "expo-router";
 import { limit, orderBy, where } from "firebase/firestore";
 import * as Icons from "phosphor-react-native";
@@ -21,6 +22,7 @@ const Home = () => {
   const { t } = useLocalization();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const tabBarHeight = useBottomTabBarHeight();
 
   const constraints = React.useMemo(() => {
     if (!user?.uid) return undefined;
@@ -70,6 +72,7 @@ const Home = () => {
               loading={loadingTransactions}
               title={t("home.recentTransactionsTitle")}
               emptyListMessage={t("home.noTransactions")}
+              bottomPadding={spacingY._20 + tabBarHeight}
             />
           </View>
         </View>
