@@ -15,6 +15,7 @@ import {
   createOrUpdateTransaction,
   deleteTransaction,
 } from "@/services/transactionService";
+import { createRecurringFromTransaction } from "@/services/recurringService";
 import { useRules } from "@/src/rules/useRules";
 import { addTransaction as addSharedTransaction } from "@/src/sharedWallets/firestore";
 import { TransactionType, WalletType } from "@/types";
@@ -36,6 +37,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   TextInput,
   TouchableOpacity,
   UIManager,
@@ -57,6 +59,7 @@ const TransactionModal = () => {
     description: string;
     image?: any;
     uid?: string;
+    tags?: string;
     walletId: string;
     sharedWallet?: string;
   };
@@ -81,6 +84,14 @@ const TransactionModal = () => {
       walletId: oldTransaction.walletId,
       image: oldTransaction?.image ?? null,
     });
+    if (oldTransaction?.tags) {
+      try {
+        const parsed = JSON.parse(oldTransaction.tags) as string[];
+        setTagsInput(Array.isArray(parsed) ? parsed.join(", ") : "");
+      } catch {
+        setTagsInput("");
+      }
+    }
     setCategoryLocked(Boolean(oldTransaction.category));
     setCategorySuggestion(null);
   }, [oldTransaction]);
@@ -112,6 +123,8 @@ const TransactionModal = () => {
     walletId: "",
     image: null,
   });
+  const [tagsInput, setTagsInput] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
 
   const [categorySuggestion, setCategorySuggestion] = useState<string | null>(
     null
@@ -177,6 +190,10 @@ const TransactionModal = () => {
   const onSubmit = async () => {
     const { type, amount, description, category, date, walletId, image } =
       transaction;
+    const tags = tagsInput
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
 
     if (!walletId || !date || !amount || (type === "expense" && !category)) {
       Alert.alert(
@@ -204,6 +221,7 @@ const TransactionModal = () => {
           description,
           date: dateValue,
           createdBy: user.uid,
+          ...(tags.length ? { tags } : {}),
         });
         setLoading(false);
         router.back();
@@ -224,6 +242,7 @@ const TransactionModal = () => {
       walletId,
       image,
       uid: user?.uid,
+      ...(tags.length ? { tags } : {}),
     };
 
     // include transaction id om te updaten komt hier
@@ -233,6 +252,37 @@ const TransactionModal = () => {
 
     setLoading(false);
     if (res.success) {
+      if (isRecurring && !oldTransaction?.id && user?.uid) {
+        try {
+          const dateValue =
+            date instanceof Date || date instanceof Timestamp
+              ? date
+              : new Date(date);
+          await createRecurringFromTransaction(user.uid, {
+            ...transaction,
+            date: dateValue,
+            tags,
+          });
+        } catch (error: any) {
+          Alert.alert(
+            t("transactionModal.alertTitle"),
+            error?.message || "Something went wrong"
+          );
+        }
+      }
+      if (res.warning) {
+        const warningKey =
+          res.warning.type === "daily"
+            ? "transactionModal.limitWarningDaily"
+            : "transactionModal.limitWarningWeekly";
+        Alert.alert(
+          t("transactionModal.alertTitle"),
+          t(warningKey, {
+            limit: res.warning.limit,
+            total: res.warning.total,
+          })
+        );
+      }
       router.back();
     } else {
       Alert.alert(t("transactionModal.alertTitle"), res.msg);
@@ -522,6 +572,31 @@ const TransactionModal = () => {
           </View>
 
           <View style={styles.inputContainer}>
+            <Typo color={colors.textLight} size={16}>
+              {t("transactionModal.tagsLabel")}
+            </Typo>
+            <Input
+              placeholder={t("transactionModal.tagsPlaceholder")}
+              value={tagsInput}
+              onChangeText={setTagsInput}
+            />
+          </View>
+
+          {!oldTransaction?.id && !isSharedWallet && (
+            <View style={styles.recurringRow}>
+              <Typo color={colors.textLight} size={16}>
+                {t("transactionModal.recurringLabel")}
+              </Typo>
+              <Switch
+                value={isRecurring}
+                onValueChange={setIsRecurring}
+                trackColor={{ false: colors.neutral600, true: colors.primary }}
+                thumbColor={colors.white}
+              />
+            </View>
+          )}
+
+          <View style={styles.inputContainer}>
             <View style={styles.flexRow}>
               <Typo color={colors.textLight} size={16}>
                 {t("transactionModal.receiptLabel")}
@@ -600,6 +675,12 @@ const createStyles = (colors: ThemeColors) =>
     },
     inputContainer: {
       gap: spacingY._10,
+    },
+    recurringRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: spacingX._10,
     },
     flexRow: {
       flexDirection: "row",

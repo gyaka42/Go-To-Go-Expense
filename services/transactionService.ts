@@ -28,6 +28,21 @@ export const createOrUpdateTransaction = async (
       return { success: false, msg: "Invalid transaction Data" };
     }
 
+    let warning: ResponseType["warning"];
+
+    if (!id && type === "expense") {
+      const dateValue =
+        transactionData.date instanceof Date ||
+        transactionData.date instanceof Timestamp
+          ? transactionData.date
+          : new Date(transactionData.date as any);
+      warning = await checkWalletLimits(
+        walletId,
+        Number(amount),
+        dateValue instanceof Timestamp ? dateValue.toDate() : dateValue
+      );
+    }
+
     if (id) {
       // update bestaande transacties
       const oldTransactionSnapshot = await getDoc(
@@ -97,11 +112,84 @@ export const createOrUpdateTransaction = async (
     return {
       success: true,
       data: { ...transactionData, id: transactionRef.id },
+      warning,
     };
   } catch (error: any) {
     console.log("error creating or updating transaction:", error);
     return { success: false, msg: error.message };
   }
+};
+
+const startOfDay = (date: Date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const startOfWeek = (date: Date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day + 6) % 7; // Monday as start
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const checkWalletLimits = async (
+  walletId: string,
+  amount: number,
+  date: Date
+): Promise<ResponseType["warning"]> => {
+  const walletSnapShot = await getDoc(doc(firestore, "wallets", walletId));
+  if (!walletSnapShot.exists()) return undefined;
+  const walletData = walletSnapShot.data() as WalletType;
+  const limits = walletData.limits;
+  if (!limits?.daily && !limits?.weekly) return undefined;
+
+  const dayStart = startOfDay(date);
+  const weekStart = startOfWeek(date);
+  const now = new Date(date);
+
+  const baseConstraints = [
+    where("walletId", "==", walletId),
+    where("date", ">=", Timestamp.fromDate(weekStart)),
+    where("date", "<=", Timestamp.fromDate(now)),
+  ];
+
+  const snapshot = await getDocs(
+    query(collection(firestore, "transactions"), ...baseConstraints)
+  );
+
+  let dailyTotal = 0;
+  let weeklyTotal = 0;
+
+  snapshot.forEach((docSnap) => {
+    const txn = docSnap.data() as TransactionType;
+    if (txn.type !== "expense") return;
+    const txnDate =
+      txn.date instanceof Timestamp
+        ? txn.date.toDate()
+        : txn.date instanceof Date
+        ? txn.date
+        : new Date(txn.date);
+    const amt = Number(txn.amount) || 0;
+    weeklyTotal += amt;
+    if (txnDate >= dayStart) {
+      dailyTotal += amt;
+    }
+  });
+
+  if (limits.daily && dailyTotal + amount > limits.daily) {
+    return { type: "daily", limit: limits.daily, total: dailyTotal + amount };
+  }
+  if (limits.weekly && weeklyTotal + amount > limits.weekly) {
+    return {
+      type: "weekly",
+      limit: limits.weekly,
+      total: weeklyTotal + amount,
+    };
+  }
+  return undefined;
 };
 
 const updateWalletForNewTransaction = async (

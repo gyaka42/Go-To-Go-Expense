@@ -3,6 +3,7 @@ import {
   normalizeEmail,
   saveEmailDirectoryEntry,
 } from "@/services/emailDirectory";
+import { processRecurring } from "@/services/recurringService";
 import { AuthContextType, UserType } from "@/types";
 import { useRouter } from "expo-router";
 import {
@@ -15,7 +16,7 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -23,6 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<UserType>(null);
+  const lastRecurringUser = useRef<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -45,6 +47,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return () => unsub();
   }, []);
+
+  useEffect(() => {
+    const uid = user?.uid ?? null;
+    if (!uid || lastRecurringUser.current === uid) return;
+    lastRecurringUser.current = uid;
+    processRecurring(uid).catch((error) => {
+      console.warn("Failed to process recurring transactions", error);
+    });
+  }, [user?.uid]);
 
   const login = async (email: string, password: string) => {
     try {

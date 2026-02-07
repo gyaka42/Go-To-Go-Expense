@@ -25,13 +25,23 @@ const WalletModal = () => {
     image: string;
     id: string;
     currency?: string;
+    limits?: string;
   } = useLocalSearchParams();
   useEffect(() => {
     if (oldWallet?.id) {
+      let parsedLimits: { daily?: number; weekly?: number } | undefined;
+      if (oldWallet?.limits) {
+        try {
+          parsedLimits = JSON.parse(oldWallet.limits);
+        } catch {
+          parsedLimits = undefined;
+        }
+      }
       setWallet({
         name: oldWallet?.name,
         image: oldWallet?.image,
         currency: oldWallet?.currency || "EUR",
+        limits: parsedLimits,
       });
     }
   }, []);
@@ -45,10 +55,14 @@ const WalletModal = () => {
     name: "",
     image: null,
     currency: "EUR",
+    limits: {
+      daily: undefined,
+      weekly: undefined,
+    },
   });
 
   const onSubmit = async () => {
-    let { name, image, currency } = wallet;
+    let { name, image, currency, limits } = wallet;
     if (!name.trim()) {
       Alert.alert(t("wallet.modal.alertTitle"), t("auth.common.fillFields"));
       return;
@@ -59,6 +73,10 @@ const WalletModal = () => {
       image: image ?? null,
       uid: user?.uid,
       currency: currency || "EUR",
+      limits: {
+        daily: limits?.daily ? Number(limits.daily) : undefined,
+        weekly: limits?.weekly ? Number(limits.weekly) : undefined,
+      },
     };
 
     if (!oldWallet?.id && user?.uid) {
@@ -139,6 +157,52 @@ const WalletModal = () => {
               autoCapitalize="characters"
               onChangeText={(value) =>
                 setWallet({ ...wallet, currency: value.toUpperCase() })
+              }
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Typo color={colors.text}>{t("wallet.modal.dailyLimitLabel")}</Typo>
+            <Input
+              placeholder={t("wallet.modal.dailyLimitPlaceholder")}
+              keyboardType="numeric"
+              value={
+                wallet.limits?.daily != null
+                  ? String(wallet.limits?.daily)
+                  : ""
+              }
+              onChangeText={(value) =>
+                setWallet({
+                  ...wallet,
+                  limits: {
+                    ...wallet.limits,
+                    daily: value
+                      ? Number(value.replace(/[^0-9.]/g, ""))
+                      : undefined,
+                  },
+                })
+              }
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Typo color={colors.text}>{t("wallet.modal.weeklyLimitLabel")}</Typo>
+            <Input
+              placeholder={t("wallet.modal.weeklyLimitPlaceholder")}
+              keyboardType="numeric"
+              value={
+                wallet.limits?.weekly != null
+                  ? String(wallet.limits?.weekly)
+                  : ""
+              }
+              onChangeText={(value) =>
+                setWallet({
+                  ...wallet,
+                  limits: {
+                    ...wallet.limits,
+                    weekly: value
+                      ? Number(value.replace(/[^0-9.]/g, ""))
+                      : undefined,
+                  },
+                })
               }
             />
           </View>

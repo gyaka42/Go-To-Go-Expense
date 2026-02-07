@@ -1,4 +1,5 @@
 import { ThemeColors, radius } from "@/constants/theme";
+import { useLocalization } from "@/contexts/localizationContext";
 import { useTheme } from "@/contexts/themeContext";
 import { getFilePath } from "@/services/imageService";
 import { ImageUploadProps } from "@/types";
@@ -7,7 +8,7 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import * as Icons from "phosphor-react-native";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Linking, StyleSheet, TouchableOpacity, View } from "react-native";
 import Typo from "./Typo";
 
 const ImageUpload = ({
@@ -19,8 +20,28 @@ const ImageUpload = ({
   placeholder = "",
 }: ImageUploadProps) => {
   const { colors } = useTheme();
+  const { t } = useLocalization();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const pickImage = async () => {
+    const existing = await ImagePicker.getMediaLibraryPermissionsAsync();
+    if (!existing.granted) {
+      const requested = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!requested.granted) {
+        Alert.alert(
+          t("permissions.photosTitle"),
+          t("permissions.photosDescription"),
+          [
+            { text: t("common.cancel"), style: "cancel" },
+            {
+              text: t("permissions.openSettings"),
+              onPress: () => Linking.openSettings(),
+            },
+          ]
+        );
+        return;
+      }
+    }
+
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       //allowsEditing: true,
@@ -28,7 +49,7 @@ const ImageUpload = ({
       quality: 0.5,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled && result.assets?.[0]) {
       onSelect(result.assets[0]);
     }
   };

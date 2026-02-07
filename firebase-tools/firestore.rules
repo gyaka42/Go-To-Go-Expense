@@ -29,8 +29,12 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
-    
+
     match /users/{userId}/rules/{ruleDocId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/recurring/{recurringId} {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
 

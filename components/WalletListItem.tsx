@@ -36,6 +36,7 @@ const WalletListItem = ({
         name: item?.name,
         image: item?.image,
         currency: item?.currency,
+        limits: item?.limits ? JSON.stringify(item.limits) : undefined,
       },
     });
   };

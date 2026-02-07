@@ -72,6 +72,7 @@ export type TransactionType = {
   category?: string;
   date: Date | Timestamp | string;
   description?: string;
+  tags?: string[];
   image?: any;
   uid?: string;
   walletId: string;
@@ -167,6 +168,11 @@ export type ResponseType = {
   success: boolean;
   data?: any;
   msg?: string;
+  warning?: {
+    type: "daily" | "weekly";
+    limit: number;
+    total: number;
+  };
 };
 
 export type WalletType = {
@@ -180,6 +186,10 @@ export type WalletType = {
   created?: Date;
   createdAt?: Date;
   currency?: string;
+  limits?: {
+    daily?: number;
+    weekly?: number;
+  };
   ownerIds?: string[];
   memberIds?: string[];
   participantIds?: string[];

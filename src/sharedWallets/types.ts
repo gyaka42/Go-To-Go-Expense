@@ -18,6 +18,7 @@ export type Transaction = {
   type: "income" | "expense";
   categoryId?: string;
   description?: string;
+  tags?: string[];
   date: Timestamp;
   createdBy: string;
   status: TransactionStatus;
@@ -30,6 +31,7 @@ export type NewTxn = {
   type: "income" | "expense";
   categoryId?: string;
   description?: string;
+  tags?: string[];
   date: Date | Timestamp;
   createdBy: string;
 };

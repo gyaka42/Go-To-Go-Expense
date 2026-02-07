@@ -31,7 +31,13 @@ const SearchModal = () => {
 
   const filteredTransactions = allTransactions.filter((item) => {
     if (search.length > 1) {
+      const tagMatch = Array.isArray(item.tags)
+        ? item.tags.some((tag) =>
+            tag.toLowerCase().includes(search.toLowerCase())
+          )
+        : false;
       if (
+        tagMatch ||
         item.category?.toLowerCase()?.includes(search?.toLowerCase()) ||
         item.type?.toLowerCase()?.includes(search?.toLowerCase()) ||
         item.description?.toLowerCase()?.includes(search?.toLowerCase())

@@ -37,19 +37,20 @@ const TransactionList = ({
     // open transactie details
     router.push({
       pathname: "/(modals)/transactionModal",
-      params: {
-        id: item?.id,
-        type: item?.type,
-        amount: item?.amount.toString(),
-        category: item?.category,
-        date: (item.date as Timestamp)?.toDate()?.toISOString(),
-        description: item?.description,
-        image: item?.image,
-        uid: item?.uid,
-        walletId: item?.walletId,
-      },
-    });
-  };
+        params: {
+          id: item?.id,
+          type: item?.type,
+          amount: item?.amount.toString(),
+          category: item?.category,
+          date: (item.date as Timestamp)?.toDate()?.toISOString(),
+          description: item?.description,
+          tags: item?.tags ? JSON.stringify(item.tags) : undefined,
+          image: item?.image,
+          uid: item?.uid,
+          walletId: item?.walletId,
+        },
+      });
+    };
   return (
     <View style={styles.container}>
       {title && (
